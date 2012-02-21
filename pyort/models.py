@@ -16,7 +16,7 @@ class Portfolio(models.Model):
         return u'%s' % self.name
 
 
-class Basis(models.Model):
+class Lot(models.Model):
     investment      = models.ForeignKey(Investment)
     portfolio       = models.ForeignKey(Portfolio)
 
@@ -25,13 +25,13 @@ class Basis(models.Model):
 
 
 class Transaction(models.Model):
-    basis           = models.ForeignKey(Basis)
+    lot             = models.ForeignKey(Lot)
     date            = models.DateField()
     price           = models.DecimalField(max_digits=12, decimal_places=4)
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
 
     def __unicode__(self):
-        return u'%s %s' % (self.basis, self.date)
+        return u'%s %s' % (self.lot, self.date)
 
     def total(self):
         return price * shares
@@ -42,7 +42,7 @@ class TransactionAggregate(object):
         self.transactions = transactions
 
     def investment(self):
-        return self.transactions[0].basis.investment
+        return self.transactions[0].lot.investment
 
     def created_date(self):
         return min(transaction.date

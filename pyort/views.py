@@ -15,16 +15,16 @@ def portfolio(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
 
     transactions_by_investment = collections.defaultdict(list)
-    for transaction in models.Transaction.objects.filter(basis__portfolio=portfolio):
-        investment = transaction.basis.investment
+    for transaction in models.Transaction.objects.filter(lot__portfolio=portfolio):
+        investment = transaction.lot.investment
         transactions_by_investment[investment].append(transaction)
 
     return _render_transactions_grouped(transactions_by_investment.values())
 
 
-def portfolio_basis(request, id):
+def portfolio_lot(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    return _render_transactions_grouped(basis.transaction_set.all()
-                                          for basis in portfolio.basis_set.all())
+    return _render_transactions_grouped(lot.transaction_set.all()
+                                          for lot in portfolio.lot_set.all())
 
 
