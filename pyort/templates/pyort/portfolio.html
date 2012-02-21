@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ portfolio.name }}{% endblock title %}
+
+{% block content %}
+  <table>
+    <tr>
+      <th>Investment</th>
+      <th>Start Date</th>
+      <th>Net Shares</th>
+    </tr>
+    {% for basis in bases %}
+      <tr>
+        <td>{{ basis.investment }}</td>
+        <td>{{ basis.start_date }}</td>
+        <td>{{ basis.shares }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock content %}

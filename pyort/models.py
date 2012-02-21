@@ -28,6 +28,14 @@ class Basis(models.Model):
     def __unicode__(self):
         return u'%s %s' % (self.investment, self.portfolio)
 
+    def start_date(self):
+        return min(transaction.date
+                     for transaction in self.transaction_set.all())
+
+    def shares(self):
+        return sum(transaction.shares
+                     for transaction in self.transaction_set.all())
+
     class Admin(object): pass
 
 
