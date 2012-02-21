@@ -21,16 +21,24 @@ class Portfolio(models.Model):
     class Admin(object): pass
 
 
-class Transaction(models.Model):
+class Basis(models.Model):
     investment      = models.ForeignKey(Investment)
     portfolio       = models.ForeignKey(Portfolio)
+
+    def __unicode__(self):
+        return u'%s %s' % (self.investment, self.portfolio)
+
+    class Admin(object): pass
+
+
+class Transaction(models.Model):
+    basis           = models.ForeignKey(Basis)
     date            = models.DateField()
     price           = models.DecimalField(max_digits=12, decimal_places=4)
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
-    parent          = models.ForeignKey('self', blank=True, null=True)
 
     def __unicode__(self):
-        return u'%s %s' % (self.investment, self.date)
+        return u'%s %s' % (self.basis, self.date)
 
     def total(self):
         return price * shares
