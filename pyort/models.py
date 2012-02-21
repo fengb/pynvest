@@ -23,18 +23,6 @@ class Basis(models.Model):
     def __unicode__(self):
         return u'%s %s' % (self.investment, self.portfolio)
 
-    def created_date(self):
-        return min(transaction.date
-                     for transaction in self.transaction_set.all())
-
-    def updated_date(self):
-        return max(transaction.date
-                     for transaction in self.transaction_set.all())
-
-    def shares(self):
-        return sum(transaction.shares
-                     for transaction in self.transaction_set.all())
-
 
 class Transaction(models.Model):
     basis           = models.ForeignKey(Basis)
@@ -47,3 +35,24 @@ class Transaction(models.Model):
 
     def total(self):
         return price * shares
+
+
+class TransactionAggregate(object):
+    def __init__(self, transactions):
+        self.transactions = transactions
+
+    def investment(self):
+        return self.transactions[0].basis.investment
+
+    def created_date(self):
+        return min(transaction.date
+                     for transaction in self.transactions)
+
+    def updated_date(self):
+        return max(transaction.date
+                     for transaction in self.transactions)
+
+    def shares(self):
+        return sum(transaction.shares
+                     for transaction in self.transactions)
+
