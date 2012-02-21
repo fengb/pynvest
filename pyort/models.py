@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib import admin
 
 
 class Investment(models.Model):
@@ -9,16 +8,12 @@ class Investment(models.Model):
     def __unicode__(self):
         return u'%s' % self.symbol
 
-    class Admin(object): pass
-
 
 class Portfolio(models.Model):
     name            = models.CharField(max_length=200)
 
     def __unicode__(self):
         return u'%s' % self.name
-
-    class Admin(object): pass
 
 
 class Basis(models.Model):
@@ -28,15 +23,17 @@ class Basis(models.Model):
     def __unicode__(self):
         return u'%s %s' % (self.investment, self.portfolio)
 
-    def start_date(self):
+    def created_date(self):
         return min(transaction.date
+                     for transaction in self.transaction_set.all())
+
+    def updated_date(self):
+        return max(transaction.date
                      for transaction in self.transaction_set.all())
 
     def shares(self):
         return sum(transaction.shares
                      for transaction in self.transaction_set.all())
-
-    class Admin(object): pass
 
 
 class Transaction(models.Model):
@@ -50,10 +47,3 @@ class Transaction(models.Model):
 
     def total(self):
         return price * shares
-
-    class Admin(object): pass
-
-
-for obj in locals().values():
-    if 'Admin' in dir(obj):
-        admin.site.register(obj)
