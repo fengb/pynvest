@@ -3,4 +3,5 @@ from . import views
 
 urlpatterns = patterns('',
     url(r'^portfolio/(?P<id>\d+)$', views.portfolio),
+    url(r'^portfolio/(?P<id>\d+)/basis$', views.portfolio_basis),
 )

@@ -6,13 +6,15 @@
   <table>
     <tr>
       <th>Investment</th>
-      <th>Start Date</th>
+      <th>Created Date</th>
+      <th>Updated Date</th>
       <th>Net Shares</th>
     </tr>
     {% for transaction_aggregate in transaction_aggregates %}
       <tr>
         <td>{{ transaction_aggregate.investment }}</td>
         <td>{{ transaction_aggregate.created_date }}</td>
+        <td>{{ transaction_aggregate.updated_date }}</td>
         <td>{{ transaction_aggregate.shares }}</td>
       </tr>
     {% endfor %}
