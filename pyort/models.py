@@ -33,13 +33,17 @@ class Transaction(models.Model):
     def __unicode__(self):
         return u'%s %s' % (self.lot, self.date)
 
+    @property
+    def investment(self):
+        return self.lot.investment
+
     def total(self):
         return price * shares
 
 
 class TransactionAggregate(object):
     def __init__(self, transactions):
-        self.transactions = transactions
+        self.transactions = list(transactions)
 
     def investment(self):
         return self.transactions[0].lot.investment
