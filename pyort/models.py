@@ -46,7 +46,7 @@ class TransactionAggregate(object):
         self.transactions = list(transactions)
 
     def investment(self):
-        return self.transactions[0].lot.investment
+        return self.transactions[0].investment
 
     def created_date(self):
         return min(transaction.date
