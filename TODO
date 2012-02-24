@@ -1,0 +1,13 @@
+Tax functionality:
+- Standard view for transactions regardless of aggregation.
+- Add transaction by lot or new lot.
+- Filter by date.
+- Realized gains.
+
+
+Organization:
+- Current price.
+- Unrealized gains.
+- Filter by active transactions.
+- Categorization.
+- Rebalancing.
