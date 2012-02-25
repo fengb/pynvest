@@ -37,5 +37,13 @@ class Transaction(models.Model):
     def investment(self):
         return self.lot.investment
 
+    @property
+    def first_trade_date(self):
+        return self.trade_date
+
+    @property
+    def last_trade_date(self):
+        return self.trade_date
+
 
 from .core import TransactionAggregate

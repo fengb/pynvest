@@ -6,13 +6,15 @@
   <table>
     <tr>
       <th>Investment</th>
-      <th>Trade Date</th>
+      <th>First Trade Date</th>
+      <th>Last Trade Date</th>
       <th>Shares</th>
     </tr>
     {% for transaction in transactions %}
       <tr>
         <td>{{ transaction.investment }}</td>
-        <td>{{ transaction.trade_date }}</td>
+        <td>{{ transaction.first_trade_date }}</td>
+        <td>{{ transaction.last_trade_date }}</td>
         <td>{{ transaction.shares }}</td>
       </tr>
     {% endfor %}

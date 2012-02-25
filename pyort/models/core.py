@@ -7,7 +7,12 @@ class TransactionAggregate(object):
         return self.transactions[0].investment
 
     @property
-    def trade_date(self):
+    def first_trade_date(self):
+        return min(transaction.trade_date
+                     for transaction in self.transactions)
+
+    @property
+    def last_trade_date(self):
         return max(transaction.trade_date
                      for transaction in self.transactions)
 
