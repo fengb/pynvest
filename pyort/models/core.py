@@ -17,6 +17,10 @@ class TransactionAggregate(object):
                      for transaction in self.transactions)
 
     @property
+    def purchase_price(self):
+        return self.transactions[0].price
+
+    @property
     def shares(self):
         return sum(transaction.shares
                      for transaction in self.transactions)

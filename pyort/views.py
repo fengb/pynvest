@@ -6,10 +6,10 @@ import operator
 
 
 def _render_transactions_grouped(transactions_grouped, portfolio=None):
-    return render_to_response('pyort/transactions.html', {
+    return render_to_response('pyort/transaction_aggregates.html', {
         'portfolio': portfolio,
-        'transactions': [models.TransactionAggregate(v)
-                           for (k, v) in transactions_grouped],
+        'transaction_aggregates': [models.TransactionAggregate(v)
+                                    for (k, v) in transactions_grouped],
     })
 
 
