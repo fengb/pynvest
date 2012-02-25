@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <table>
+    <tr>
+      <th>Investment</th>
+      <th>Trade Date</th>
+      <th>Shares</th>
+    </tr>
+    {% for transaction in transactions %}
+      <tr>
+        <td>{{ transaction.investment }}</td>
+        <td>{{ transaction.trade_date }}</td>
+        <td>{{ transaction.shares }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock content %}

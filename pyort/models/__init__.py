@@ -26,7 +26,7 @@ class Lot(models.Model):
 
 class Transaction(models.Model):
     lot             = models.ForeignKey(Lot)
-    date            = models.DateField()
+    trade_date      = models.DateField()
     price           = models.DecimalField(max_digits=12, decimal_places=4)
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
 
@@ -36,9 +36,6 @@ class Transaction(models.Model):
     @property
     def investment(self):
         return self.lot.investment
-
-    def total(self):
-        return price * shares
 
 
 from .core import TransactionAggregate

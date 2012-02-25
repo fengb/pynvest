@@ -1,5 +1,4 @@
 Tax functionality:
-- Standard view for transactions regardless of aggregation.
 - Add transaction by lot or new lot.
 - Filter by date.
 - Realized gains.
