@@ -12,28 +12,24 @@ class TransactionAggregate(object):
         return self.transactions[0].investment
 
     @property
-    def first_trade_date(self):
-        return min(transaction.trade_date
-                     for transaction in self.transactions)
-
-    @property
-    def last_trade_date(self):
-        return max(transaction.trade_date
-                     for transaction in self.transactions)
-
-    @property
-    def purchase_price(self):
-        return self.transactions[0].price
+    def trade_date(self):
+        return min(t.trade_date for t in self.transactions)
 
     @property
     def shares(self):
-        return sum(transaction.shares
-                     for transaction in self.transactions)
+        return sum(t.shares for t in self.transactions)
+
+    @property
+    def price(self):
+        # Weighted average of purchase prices
+        purchase_transactions = filter(lambda x: x.shares > 0, self.transactions)
+        return (sum(t.price * t.shares for t in purchase_transactions) /
+                sum(t.shares for t in purchase_transactions))
 
     @classmethod
     def for_portfolio_by_investment(cls, portfolio):
-        transactions = Transaction.objects.filter(lot__portfolio=portfolio)
-        grouped = util.groupbyrollup(transactions, key=operator.attrgetter('investment'))
+        by_lots = cls.for_portfolio_by_lot(portfolio)
+        grouped = util.groupbyrollup(by_lots, key=operator.attrgetter('investment'))
         return [cls(v) for (k, v) in grouped]
 
     @classmethod
