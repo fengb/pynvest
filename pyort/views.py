@@ -7,18 +7,11 @@ import operator
 
 def portfolio(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    return render_to_response('pyort/transaction_aggregates.html', {
+    return render_to_response('pyort/transactions.html', {
         'title': portfolio.name,
-        'transaction_aggregates': models.TransactionAggregate.for_portfolio_by_investment(portfolio),
+        'transactions': models.TransactionAggregate.for_portfolio_by_investment(portfolio),
     })
 
-
-def portfolio_lot(request, id):
-    portfolio = get_object_or_404(models.Portfolio, id=id)
-    return render_to_response('pyort/transaction_aggregates.html', {
-        'title': portfolio.name,
-        'transaction_aggregates': models.TransactionAggregate.for_portfolio_by_lot(portfolio),
-    })
 
 def portfolio_flat(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)

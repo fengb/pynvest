@@ -1,0 +1,16 @@
+<tr>
+  <td>{{ transaction.investment }}</td>
+  <td>{{ transaction.trade_date }}</td>
+  <td>{{ transaction.price }}</td>
+  <td>{{ transaction.shares }}</td>
+</tr>
+
+{% if transaction.transactions and transaction.transactions|length > 1 %}
+  {% for sub in transaction.transactions %}
+    {% with "pyort/transaction_row.html" as filename %}
+      {% with sub as transaction %}
+        {% include filename %}
+      {% endwith %}
+    {% endwith %}
+  {% endfor %}
+{% endif %}
