@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <table>
+    {% for transaction_summary in transaction_summarys %}
+      <tbody>
+        <tr>
+          <th>{{ transaction_summary.investment }}</th>
+          {% for transaction in transaction_summary.transactions %}
+            <td>{{ transaction.trade_date|date:'Y-m-d' }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>{{ transaction_summary.shares|floatformat:'4' }}</td>
+          {% for transaction in transaction_summary.transactions %}
+            <td>{{ transaction.shares|floatformat:'4' }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>---</td>
+          {% for transaction in transaction_summary.transactions %}
+            <td>{{ transaction.price|floatformat:'4' }}</td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    {% endfor %}
+  </table>
+{% endblock content %}
