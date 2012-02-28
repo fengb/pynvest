@@ -1,3 +1,4 @@
 tr th { text-align: left; }
 tr.level-2 th { padding-left:16px; }
 tr.level-3 th { padding-left:32px; }
+tr td { padding: 0 8px; text-align: right; }
