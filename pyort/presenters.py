@@ -23,6 +23,9 @@ class TransactionAggregate(object):
         if len(self.transactions) == 1:
             return self.transactions[0].price
 
+        if self.shares == 0:
+            return 0
+
         # Weighted average of purchase prices
         purchase_transactions = filter(lambda x: x.shares > 0, self.transactions)
         return (sum(t.price * t.shares for t in purchase_transactions) /
