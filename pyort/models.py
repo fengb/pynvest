@@ -36,6 +36,3 @@ class Transaction(models.Model):
     @property
     def investment(self):
         return self.lot.investment
-
-
-from .core import TransactionAggregate
