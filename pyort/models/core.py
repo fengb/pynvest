@@ -26,13 +26,25 @@ class TransactionAggregate(object):
         return (sum(t.price * t.shares for t in purchase_transactions) /
                 sum(t.shares for t in purchase_transactions))
 
-    @classmethod
-    def for_portfolio_by_investment(cls, portfolio):
-        by_lots = cls.for_portfolio_by_lot(portfolio)
-        grouped = util.groupbyrollup(by_lots, key=operator.attrgetter('investment'))
-        return [cls(v) for (k, v) in grouped]
+    def flatten(self):
+        val = [self]
+
+        if len(self.transactions) > 1:
+            # TODO: remove special case
+            for sub in self.transactions:
+                if hasattr(sub, 'flatten'):
+                    val.extend(sub.flatten())
+                else:
+                    val.append(sub)
+
+        return val
 
     @classmethod
-    def for_portfolio_by_lot(cls, portfolio):
-        return [cls(lot.transaction_set.all())
-                 for lot in Lot.objects.filter(portfolio=portfolio)]
+    def from_lot(cls, lot):
+        return cls(lot.transaction_set.all())
+
+    @classmethod
+    def from_portfolio(cls, portfolio):
+        by_lots = [cls.from_lot(lot) for lot in Lot.objects.filter(portfolio=portfolio)]
+        grouped = util.groupbyrollup(by_lots, key=operator.attrgetter('investment'))
+        return cls([cls(v) for (k, v) in grouped])

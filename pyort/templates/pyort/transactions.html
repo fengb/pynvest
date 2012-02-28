@@ -11,7 +11,12 @@
       <th>Shares</th>
     </tr>
     {% for transaction in transactions %}
-      {% include 'pyort/transaction_row.html' %}
+      <tr>
+        <td>{{ transaction.investment }}</td>
+        <td>{{ transaction.trade_date }}</td>
+        <td>{{ transaction.price }}</td>
+        <td>{{ transaction.shares }}</td>
+      </tr>
     {% endfor %}
   </table>
 {% endblock content %}

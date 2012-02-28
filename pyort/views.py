@@ -9,7 +9,7 @@ def portfolio(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     return render_to_response('pyort/transactions.html', {
         'title': portfolio.name,
-        'transactions': models.TransactionAggregate.for_portfolio_by_investment(portfolio),
+        'transactions': models.TransactionAggregate.from_portfolio(portfolio).flatten()[1:],
     })
 
 
