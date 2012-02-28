@@ -11,8 +11,8 @@
       <th>Shares</th>
     </tr>
     {% for transaction in transactions %}
-      <tr>
-        <td>{{ transaction.investment }}</td>
+      <tr class='level-{{transaction.level}}'>
+        <th>{{ transaction.investment }}</th>
         <td>{{ transaction.trade_date }}</td>
         <td>{{ transaction.price }}</td>
         <td>{{ transaction.shares }}</td>
