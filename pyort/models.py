@@ -23,6 +23,15 @@ class Lot(models.Model):
     def __unicode__(self):
         return u'%s %s' % (self.investment, self.portfolio)
 
+    def purchase_transaction(self):
+        return self.transaction_set.order_by('trade_date')[0]
+
+    def gains(self):
+        return -sum(t.amount() for t in self.transaction_set.all()) + self.shares() * self.purchase_transaction().price
+
+    def shares(self):
+        return sum(t.shares for t in self.transaction_set.all())
+
 
 class Transaction(models.Model):
     lot             = models.ForeignKey(Lot)
@@ -31,8 +40,11 @@ class Transaction(models.Model):
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
 
     def __unicode__(self):
-        return u'%s %s' % (self.lot, self.trade_date)
+        return u'%s %s %s' % (self.investment, self.trade_date, self.amount())
 
     @property
     def investment(self):
         return self.lot.investment
+
+    def amount(self):
+        return self.price * self.shares
