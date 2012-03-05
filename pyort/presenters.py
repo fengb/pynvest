@@ -74,3 +74,7 @@ class TransactionSummary(object):
     @classmethod
     def group_by_lot(cls, transactions):
         return [cls(ts) for (lot, ts) in util.groupbyrollup(transactions, key=operator.attrgetter('lot'))]
+
+    @classmethod
+    def group_with_purchase(cls, transactions):
+        return [cls([t.lot.purchase_transaction(), t]) for t in transactions]

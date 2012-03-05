@@ -20,6 +20,17 @@ def portfolio_summary_by_year(request, id, year):
     })
 
 
+def portfolio_sales_by_year(request, id, year):
+    portfolio = get_object_or_404(models.Portfolio, id=id)
+    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio,
+                                                     trade_date__year=int(year),
+                                                     shares__lt=0)
+    return render_to_response('pyort/transaction_summary_table.html', {
+        'title': portfolio.name,
+        'transaction_summarys': presenters.TransactionSummary.group_with_purchase(transactions),
+    })
+
+
 def portfolio_flat(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     return render_to_response('pyort/transactions.html', {
