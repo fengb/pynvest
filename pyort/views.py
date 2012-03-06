@@ -25,9 +25,9 @@ def portfolio_sales_by_year(request, id, year):
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio,
                                                      trade_date__year=int(year),
                                                      shares__lt=0)
-    return render_to_response('pyort/transaction_summary_table.html', {
+    return render_to_response('pyort/transaction_sales_table.html', {
         'title': portfolio.name,
-        'transaction_summarys': presenters.TransactionSummary.group_with_purchase(transactions),
+        'transaction_purchases_sales': [(t.lot.purchase_transaction(), t) for t in transactions],
     })
 
 
