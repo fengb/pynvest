@@ -10,10 +10,13 @@ def portfolio(request, id):
     })
 
 
-def portfolio_summary_by_year(request, id, year):
+def portfolio_summary(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio,
-                                                     trade_date__year=int(year))
+    if year:
+        transactions = models.Transaction.objects.filter(lot__portfolio=portfolio,
+                                                         trade_date__year=int(year))
+    else:
+        transactions = models.Transaction.objects.filter(lot__portfolio=portfolio)
     return render_to_response('pyort/transaction_summary_table.html', {
         'title': portfolio.name,
         'transaction_summarys': presenters.TransactionSummary.group_by_lot(transactions),
