@@ -14,5 +14,5 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^pyort/', include('pyort.urls')),
+    url(r'^pynvest/portfolio/', include('pynvest_portfolio.urls')),
 )
