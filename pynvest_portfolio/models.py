@@ -1,12 +1,5 @@
 from django.db import models
-
-
-class Investment(models.Model):
-    symbol          = models.CharField(max_length=5, unique=True)
-    name            = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return u'%s' % self.symbol
+import pynvest_core
 
 
 class Portfolio(models.Model):
@@ -17,7 +10,7 @@ class Portfolio(models.Model):
 
 
 class Lot(models.Model):
-    investment      = models.ForeignKey(Investment)
+    investment      = models.ForeignKey(pynvest_core.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
 
     def __unicode__(self):
