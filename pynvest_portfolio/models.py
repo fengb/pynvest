@@ -19,9 +19,6 @@ class Lot(models.Model):
     def purchase_transaction(self):
         return self.transaction_set.order_by('trade_date')[0]
 
-    def gains(self):
-        return -sum(t.amount() for t in self.transaction_set.all()) + self.shares() * self.purchase_transaction().price
-
     def shares(self):
         return sum(t.shares for t in self.transaction_set.all())
 
