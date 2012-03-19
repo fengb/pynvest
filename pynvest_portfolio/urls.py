@@ -4,6 +4,5 @@ from . import views
 urlpatterns = patterns('',
     url(r'^(?P<id>\d+)/lot/$', views.portfolio_summary),
     url(r'^(?P<id>\d+)/lot/(?P<year>\d+)/$', views.portfolio_summary),
-    url(r'^(?P<id>\d+)/sales/(?P<year>\d+)/$', views.portfolio_sales_by_year),
     url(r'^(?P<id>\d+)/flat/$', views.portfolio_flat),
 )

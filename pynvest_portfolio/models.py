@@ -20,7 +20,7 @@ class Transaction(models.Model):
 
     @property
     def shares(self):
-        return sum(lt.shares for lt in self.lot_transaction.all())
+        return sum(lt.shares for lt in self.lottransaction_set.all())
 
     def amount(self):
         return self.price * self.shares
