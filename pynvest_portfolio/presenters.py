@@ -18,5 +18,5 @@ class TransactionSummary(object):
         return sum(t.shares for t in self.transactions)
 
     @classmethod
-    def group_by_lot(cls, transactions):
-        return [cls(ts) for (lot, ts) in util.groupbyrollup(transactions, key=operator.attrgetter('lot'))]
+    def group_by_investment(cls, transactions):
+        return [cls(ts) for (investment, ts) in util.groupbyrollup(transactions, key=operator.attrgetter('investment'))]
