@@ -2,13 +2,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 from . import models, presenters, util
 
 
-def portfolio_summary(request, id, year=None):
+def portfolio_summary(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    if year:
-        transactions = models.Transaction.objects.filter(portfolio=portfolio,
-                                                         date__year=int(year))
-    else:
-        transactions = models.Transaction.objects.filter(portfolio=portfolio)
+    transactions = models.Transaction.objects.filter(portfolio=portfolio)
     return render_to_response('pyort/transaction_summary_table.html', {
         'title': portfolio.name,
         'transaction_summarys': presenters.TransactionSummary.group_by_investment(transactions),
