@@ -13,7 +13,7 @@
     {% for transaction in transactions %}
       <tr class='level-{{transaction.level}}'>
         <th>{{ transaction.investment }}</th>
-        <td>{{ transaction.trade_date|date:'Y-m-d' }}</td>
+        <td>{{ transaction.date|date:'Y-m-d' }}</td>
         <td>{{ transaction.price|floatformat:'4' }}</td>
         <td>{{ transaction.shares|floatformat:'4' }}</td>
       </tr>

@@ -6,7 +6,7 @@ def portfolio_summary(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     if year:
         transactions = models.Transaction.objects.filter(portfolio=portfolio,
-                                                         trade_date__year=int(year))
+                                                         date__year=int(year))
     else:
         transactions = models.Transaction.objects.filter(portfolio=portfolio)
     return render_to_response('pyort/transaction_summary_table.html', {

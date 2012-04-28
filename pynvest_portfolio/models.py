@@ -12,11 +12,11 @@ class Portfolio(models.Model):
 class Transaction(models.Model):
     investment      = models.ForeignKey(pynvest_core.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
-    trade_date      = models.DateField()
+    date            = models.DateField()
     price           = models.DecimalField(max_digits=12, decimal_places=4)
 
     def __unicode__(self):
-        return u'%s %s %s' % (self.investment, self.trade_date, self.amount())
+        return u'%s %s %s' % (self.investment, self.date, self.amount())
 
     @property
     def shares(self):
@@ -34,7 +34,7 @@ class Lot(models.Model):
         return u'%s %s' % (self.investment, self.portfolio)
 
     def purchase_transaction(self):
-        return self.lot_transaction_set.order_by('transaction__trade_date')[0]
+        return self.lot_transaction_set.order_by('transaction__date')[0]
 
     def shares(self):
         return sum(t.shares for t in self.transaction_set.all())
@@ -46,8 +46,8 @@ class LotTransaction(models.Model):
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
 
     @property
-    def trade_date(self):
-        return self.transaction.trade_date
+    def date(self):
+        return self.transaction.date
 
     @property
     def price(self):

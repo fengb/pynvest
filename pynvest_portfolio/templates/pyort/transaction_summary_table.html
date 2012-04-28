@@ -15,7 +15,7 @@
           <th>Date</th>
           <td></td>
           {% for transaction in transaction_summary.transactions %}
-            <td>{{ transaction.trade_date|date:'Y-m-d' }}</td>
+            <td>{{ transaction.date|date:'Y-m-d' }}</td>
           {% endfor %}
         </tr>
         <tr>
