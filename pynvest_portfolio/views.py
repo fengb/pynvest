@@ -11,6 +11,17 @@ def portfolio_summary(request, id):
     })
 
 
+def portfolio_sales(request, id, year):
+    portfolio = get_object_or_404(models.Portfolio, id=id)
+    transactions = models.LotTransaction.objects.filter(transaction__portfolio=portfolio,
+                                                        transaction__date__year=year)
+
+    return render_to_response('pyort/transaction_sales_table.html', {
+        'title': portfolio.name,
+        'transactions': [t for t in transactions if t.origin() != t],
+    })
+
+
 def portfolio_flat(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     return render_to_response('pyort/transactions.html', {

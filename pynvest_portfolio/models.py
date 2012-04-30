@@ -34,7 +34,7 @@ class Lot(models.Model):
         return u'%s %s' % (self.investment, self.portfolio)
 
     def purchase_transaction(self):
-        return self.lot_transaction_set.order_by('transaction__date')[0]
+        return self.lottransaction_set.order_by('transaction__date')[0]
 
     def shares(self):
         return sum(t.shares for t in self.transaction_set.all())
@@ -46,9 +46,17 @@ class LotTransaction(models.Model):
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
 
     @property
+    def investment(self):
+        return self.transaction.investment
+
+    @property
     def date(self):
         return self.transaction.date
 
     @property
     def price(self):
         return self.transaction.price
+
+    @property
+    def origin(self):
+        return self.lot.purchase_transaction
