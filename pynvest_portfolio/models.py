@@ -16,7 +16,7 @@ class Lot(models.Model):
     def __unicode__(self):
         return u'%s %s' % (self.investment, self.portfolio)
 
-    def purchase_transaction(self):
+    def base_transaction(self):
         return self.transaction_set.order_by('date')[0]
 
     def shares(self):
@@ -36,8 +36,11 @@ class Transaction(models.Model):
     def investment(self):
         return self.lot.investment
 
-    def origin(self):
-        return self.lot.purchase_transaction()
+    def base_transaction(self):
+        return self.lot.base_transaction()
 
     def amount(self):
         return self.price * self.shares
+
+    def realized_gain(self):
+        return -self.shares * (self.price - self.base_transaction().price)

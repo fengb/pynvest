@@ -8,23 +8,24 @@
     <thead>
       <tr>
         <th>Investment</th>
-        <th>Shares</th>
         <th>Purchase Date</th>
-        <th>Purchase Price</th>
         <th>Sale Date</th>
+        <th>Shares</th>
+        <th>Purchase Price</th>
         <th>Sale Price</th>
-        <th>Gain</th>
+        <th>Realized Gain</th>
       </tr>
     </thead>
     {% for transaction in transactions %}
       <tbody>
         <tr>
           <th>{{ transaction.investment }}</th>
-          <td>{{ transaction.shares }}</td>
-          <td>{{ transaction.origin.date }}</td>
-          <td>{{ transaction.origin.price }}</td>
+          <td>{{ transaction.base_transaction.date }}</td>
           <td>{{ transaction.date }}</td>
-          <td>{{ transaction.price }}</td>
+          <td>{{ transaction.shares|floatformat:4 }}</td>
+          <td>{{ transaction.base_transaction.price|floatformat:4 }}</td>
+          <td>{{ transaction.price|floatformat:4 }}</td>
+          <td>{{ transaction.realized_gain|floatformat:4 }}</td>
         </tr>
       </tbody>
     {% endfor %}

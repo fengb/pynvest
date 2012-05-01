@@ -14,11 +14,11 @@ def portfolio_summary(request, id):
 def portfolio_sales(request, id, year):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio,
-                                                     date__year=year)
+                                                     date__year=year).order_by('date', 'lot__investment')
 
     return render_to_response('pynvest_portfolio/transaction_sales_table.html', {
         'title': portfolio.name,
-        'transactions': [t for t in transactions if t.origin() != t],
+        'transactions': [t for t in transactions if t.base_transaction() != t],
     })
 
 
