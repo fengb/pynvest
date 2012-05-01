@@ -4,34 +4,30 @@
 
 {% block content %}
   <table>
-    <col />
-    <col class='summary' />
+    <thead>
+      <tr>
+        <th>Investment</th>
+        <th>Purchase Date</th>
+        <th>Purchase Price</th>
+        <th>Shares</th>
+      </tr>
+    </thead>
     {% for transaction_summary in transaction_summarys %}
       <tbody>
         <tr>
           <th>{{ transaction_summary.investment }}</th>
-        </tr>
-        <tr>
-          <th>Date</th>
           <td></td>
-          {% for transaction in transaction_summary.transactions %}
+          <td></td>
+          <td>{{ transaction_summary.shares|floatformat:4 }}</td>
+        </tr>
+        {% for transaction in transaction_summary.transactions %}
+          <tr>
+            <th></th>
             <td>{{ transaction.date|date:'Y-m-d' }}</td>
-          {% endfor %}
-        </tr>
-        <tr>
-          <th>Shares</th>
-          <td>{{ transaction_summary.shares|floatformat:'4' }}</td>
-          {% for transaction in transaction_summary.transactions %}
-            <td>{{ transaction.shares|floatformat:'4' }}</td>
-          {% endfor %}
-        </tr>
-        <tr>
-          <th>Price</th>
-          <td>---</td>
-          {% for transaction in transaction_summary.transactions %}
             <td>{{ transaction.price|floatformat:'4' }}</td>
-          {% endfor %}
-        </tr>
+            <td>{{ transaction.shares|floatformat:'4' }}</td>
+          </tr>
+        {% endfor %}
       </tbody>
     {% endfor %}
   </table>
