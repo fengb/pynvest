@@ -1,5 +1,6 @@
 from django.db import models
 import pynvest_core
+from . import managers
 
 
 class Portfolio(models.Model):
@@ -19,8 +20,7 @@ class Lot(models.Model):
     def base_transaction(self):
         return self.transaction_set.order_by('date')[0]
 
-    def shares(self):
-        return sum(t.shares for t in self.transaction_set.all())
+    objects = managers.Annotated(outstanding_shares=models.Sum('transaction__shares'))
 
 
 class Transaction(models.Model):
