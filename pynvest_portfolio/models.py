@@ -20,7 +20,7 @@ class Lot(models.Model):
     def base_transaction(self):
         return self.transaction_set.order_by('date')[0]
 
-    objects = managers.Annotated(outstanding_shares=models.Sum('transaction__shares'))
+    objects = managers.AnnotatedLotManager()
 
 
 class Transaction(models.Model):
