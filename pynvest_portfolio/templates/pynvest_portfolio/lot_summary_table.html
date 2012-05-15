@@ -9,23 +9,23 @@
         <th>Investment</th>
         <th>Purchase Date</th>
         <th>Purchase Price</th>
-        <th>Shares</th>
+        <th>Outstanding Shares</th>
       </tr>
     </thead>
-    {% for transaction_summary in transaction_summarys %}
+    {% for lot_summary in lot_summarys %}
       <tbody>
         <tr>
-          <th>{{ transaction_summary.investment }}</th>
+          <th>{{ lot_summary.investment }}</th>
           <td></td>
           <td></td>
-          <td>{{ transaction_summary.shares|floatformat:4 }}</td>
+          <td>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
         </tr>
-        {% for transaction in transaction_summary.transactions %}
+        {% for lot in lot_summary.lots %}
           <tr>
             <th></th>
-            <td>{{ transaction.date|date:'Y-m-d' }}</td>
-            <td>{{ transaction.price|floatformat:'4' }}</td>
-            <td>{{ transaction.shares|floatformat:'4' }}</td>
+            <td>{{ lot.base_transaction.date|date:'Y-m-d' }}</td>
+            <td>{{ lot.base_transaction.price|floatformat:'4' }}</td>
+            <td>{{ lot.outstanding_shares|floatformat:'4' }}</td>
           </tr>
         {% endfor %}
       </tbody>

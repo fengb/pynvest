@@ -4,17 +4,17 @@ from . import models, presenters, util
 
 def portfolio_summary(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio)
-    return render_to_response('pynvest_portfolio/transaction_summary_table.html', {
+    lots = models.Lot.objects.filter(portfolio=portfolio, outstanding_shares__gt=0)
+    return render_to_response('pynvest_portfolio/lot_summary_table.html', {
         'title': portfolio.name,
-        'transaction_summarys': presenters.TransactionSummary.group_by_investment(transactions),
+        'lot_summarys': presenters.LotSummary.group_by_investment(lots),
     })
 
 
 def portfolio_sales(request, id, year):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio,
-                                                     date__year=year).order_by('date', 'lot__investment')
+    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, date__year=year)\
+                                             .order_by('date', 'lot__investment')
 
     return render_to_response('pynvest_portfolio/transaction_sales_table.html', {
         'title': portfolio.name,

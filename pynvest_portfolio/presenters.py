@@ -2,21 +2,21 @@ from . import models, util
 import operator
 
 
-class TransactionSummary(object):
-    def __init__(self, transactions):
-        if len(transactions) < 1:
+class LotSummary(object):
+    def __init__(self, lots):
+        if len(lots) < 1:
             raise ValueError
-        if len(set(t.investment for t in transactions)) > 1:
+        if len(set(l.investment for l in lots)) > 1:
             raise ValueError
 
-        self.transactions = transactions
+        self.lots = lots
 
     def investment(self):
-        return self.transactions[0].investment
+        return self.lots[0].investment
 
-    def shares(self):
-        return sum(t.shares for t in self.transactions)
+    def outstanding_shares(self):
+        return sum(l.outstanding_shares for l in self.lots)
 
     @classmethod
-    def group_by_investment(cls, transactions):
-        return [cls(ts) for (investment, ts) in util.groupbyrollup(transactions, key=operator.attrgetter('investment'))]
+    def group_by_investment(cls, lots):
+        return [cls(ls) for (investment, ls) in util.groupbyrollup(lots, key=operator.attrgetter('investment'))]
