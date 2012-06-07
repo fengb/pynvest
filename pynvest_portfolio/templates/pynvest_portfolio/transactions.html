@@ -4,19 +4,25 @@
 
 {% block content %}
   <table>
-    <tr>
-      <th>Investment</th>
-      <th>Trade Date</th>
-      <th>Price</th>
-      <th>Shares</th>
-    </tr>
-    {% for transaction in transactions %}
-      <tr class='level-{{transaction.level}}'>
-        <th>{{ transaction.investment }}</th>
-        <td>{{ transaction.date|date:'Y-m-d' }}</td>
-        <td>{{ transaction.price|floatformat:'4' }}</td>
-        <td>{{ transaction.shares|floatformat:'4' }}</td>
+    <thead>
+      <tr>
+        <th>Investment</th>
+        <th>Trade Date</th>
+        <th>Price</th>
+        <th>Shares</th>
+        <th>Value</th>
       </tr>
+    </thead>
+    {% for transaction in transactions %}
+      <tbody>
+        <tr>
+          <th>{{ transaction.investment }}</th>
+          <td>{{ transaction.date|date:'Y-m-d' }}</td>
+          <td>{{ transaction.price|floatformat:'4' }}</td>
+          <td>{{ transaction.shares|floatformat:'4' }}</td>
+          <td>{{ transaction.value|floatformat:'4' }}</td>
+        </tr>
+      </tbody>
     {% endfor %}
   </table>
 {% endblock content %}

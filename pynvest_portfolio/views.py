@@ -26,5 +26,5 @@ def portfolio_flat(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     return render_to_response('pynvest_portfolio/transactions.html', {
         'portfolio': portfolio,
-        'transactions': models.Transaction.objects.filter(lot__portfolio=portfolio),
+        'transactions': models.Transaction.objects.filter(lot__portfolio=portfolio).order_by('date', 'lot__investment'),
     })

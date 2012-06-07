@@ -30,7 +30,7 @@ class Transaction(models.Model):
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
 
     def __unicode__(self):
-        return u'%s %s %s' % (self.investment, self.date, self.amount())
+        return u'%s %s %s' % (self.investment, self.date, self.value())
 
     @property
     def investment(self):
@@ -39,7 +39,7 @@ class Transaction(models.Model):
     def base_transaction(self):
         return self.lot.base_transaction()
 
-    def amount(self):
+    def value(self):
         return self.price * self.shares
 
     def realized_gain(self):
