@@ -10,6 +10,16 @@ class Portfolio(models.Model):
         return u'%s' % self.name
 
 
+class Dividend(models.Model):
+    investment      = models.ForeignKey(pynvest_core.models.Investment)
+    portfolio       = models.ForeignKey(Portfolio)
+    date            = models.DateField()
+    value           = models.DecimalField(max_digits=12, decimal_places=4)
+
+    def __unicode__(self):
+        return u'%s %s %s' % (self.investment, self.date, self.value)
+
+
 class Lot(models.Model):
     investment      = models.ForeignKey(pynvest_core.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
