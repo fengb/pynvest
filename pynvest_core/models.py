@@ -19,11 +19,11 @@ class Investment(models.Model):
         return u'%s' % (self.symbol)
 
     def price_at(self, date):
-        HistoricPriceMeta.populate(self, date)
-        self.historicprice_set.get(date=date)
+        HistoricalPriceMeta.populate(self, date)
+        self.historicalprice_set.get(date=date)
 
 
-class HistoricPrice(models.Model):
+class HistoricalPrice(models.Model):
     investment      = models.ForeignKey(Investment)
     date            = models.DateField()
     high            = models.DecimalField(max_digits=12, decimal_places=4)
@@ -40,7 +40,7 @@ def get_or_new(relation, *args, **kwargs):
     except relation.model.DoesNotExist:
         return relation.model(*args, **kwargs)
 
-class HistoricPriceMeta(models.Model):
+class HistoricalPriceMeta(models.Model):
     investment      = models.OneToOneField(Investment)
     start_date      = models.DateField()
     end_date        = models.DateField()
@@ -57,12 +57,12 @@ class HistoricPriceMeta(models.Model):
 
         if self.start_date is None or self.end_date is None or \
            self.start_date > target_date or self.end_date < target_date:
-            prices = pynvest_connect.historic_prices(investment.symbol)
+            prices = pynvest_connect.historical_prices(investment.symbol)
             self.start_date = prices[-1]['date']
             self.end_date = prices[0]['date']
             self.save()
             for row in prices:
-                price = investment.historicprice_set.get_or_create(date=row['date'], defaults={
+                price = investment.historicalprice_set.get_or_create(date=row['date'], defaults={
                     'high': 0.0,
                     'low': 0.0,
                     'close': 0.0,
