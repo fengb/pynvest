@@ -11,7 +11,7 @@ def _convert(field):
         return decimal.Decimal(field)
 
 
-def historical_prices(symbol):
+def historic_prices(symbol):
     response = urllib2.urlopen('http://ichart.finance.yahoo.com/table.csv?s=%s' % symbol)
     try:
         raw = csv.reader(response)
