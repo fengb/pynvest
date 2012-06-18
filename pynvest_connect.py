@@ -1,5 +1,14 @@
 import urllib2
 import csv
+import datetime
+import decimal
+
+
+def _convert(field):
+    if '-' in field:
+        return datetime.date(*map(int, field.split('-')))
+    else:
+        return decimal.Decimal(field)
 
 
 def historical_prices(symbol):
@@ -8,6 +17,6 @@ def historical_prices(symbol):
         raw = csv.reader(response)
 
         directives = map(str.lower, next(raw))
-        return [dict(zip(directives, row)) for row in raw]
+        return [dict(zip(directives, map(_convert, row))) for row in raw]
     finally:
         response.close()
