@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 import pynvest_connect
 import datetime
 
@@ -44,17 +44,23 @@ class HistoricalPriceMeta(models.Model):
         return u'%s %s %s' % (self.investment, self.start_date, self.end_date)
 
     @classmethod
+    @transaction.commit_on_success
     def populate(cls, investment, target_date):
         yesterday = datetime.date.today() - datetime.timedelta(1)
         if target_date > yesterday:
             raise ValueError('target_date must be in the past: %s' % target_date)
 
         self, created = cls.objects.get_or_create(investment=investment, defaults={
+            # Dummy values to force data load
             'start_date': datetime.date.today(),
             'end_date': datetime.date.today(),
         })
 
         if self.start_date > target_date or self.end_date < target_date:
+            self.start_date = prices[-1]['date']
+            self.end_date = yesterday
+            self.save()
+
             prices = pynvest_connect.historical_prices(investment.symbol)
             for row in prices:
                 price, created = investment.historicalprice_set.get_or_create(date=row['date'], defaults={
@@ -66,7 +72,3 @@ class HistoricalPriceMeta(models.Model):
                 price.low = row['low']
                 price.close = row['close']
                 price.save()
-
-            self.start_date = prices[-1]['date']
-            self.end_date = yesterday
-            self.save()
