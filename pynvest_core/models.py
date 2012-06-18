@@ -1,5 +1,6 @@
 from django.db import models
 import pynvest_connect
+import datetime
 
 
 class Exchange(models.Model):
@@ -34,12 +35,6 @@ class HistoricalPrice(models.Model):
         return u'%s %s %s' % (self.investment, self.date, self.close)
 
 
-def get_or_new(relation, *args, **kwargs):
-    try:
-        return relation.get(*args, **kwargs)
-    except relation.model.DoesNotExist:
-        return relation.model(*args, **kwargs)
-
 class HistoricalPriceMeta(models.Model):
     investment      = models.OneToOneField(Investment)
     start_date      = models.DateField()
@@ -50,24 +45,28 @@ class HistoricalPriceMeta(models.Model):
 
     @classmethod
     def populate(cls, investment, target_date):
-        try:
-            self = cls.objects.get(investment=investment)
-        except cls.DoesNotExist:
-            self = cls(investment=investment)
+        yesterday = datetime.date.today() - datetime.timedelta(1)
+        if target_date > yesterday:
+            raise ValueError('target_date must be in the past: %s' % target_date)
 
-        if self.start_date is None or self.end_date is None or \
-           self.start_date > target_date or self.end_date < target_date:
+        self, created = cls.objects.get_or_create(investment=investment, defaults={
+            'start_date': datetime.date.today(),
+            'end_date': datetime.date.today(),
+        })
+
+        if self.start_date > target_date or self.end_date < target_date:
             prices = pynvest_connect.historical_prices(investment.symbol)
-            self.start_date = prices[-1]['date']
-            self.end_date = prices[0]['date']
-            self.save()
             for row in prices:
-                price = investment.historicalprice_set.get_or_create(date=row['date'], defaults={
-                    'high': 0.0,
-                    'low': 0.0,
-                    'close': 0.0,
+                price, created = investment.historicalprice_set.get_or_create(date=row['date'], defaults={
+                    'high': 0,
+                    'low': 0,
+                    'close': 0,
                 })
                 price.high = row['high']
                 price.low = row['low']
                 price.close = row['close']
                 price.save()
+
+            self.start_date = prices[-1]['date']
+            self.end_date = yesterday
+            self.save()
