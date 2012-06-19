@@ -72,11 +72,12 @@ class HistoricalPriceMeta(models.Model):
         })
 
         if self.start_date > target_date or self.end_date < target_date:
+            prices = pynvest_connect.historical_prices(investment.symbol)
+
             self.start_date = prices[-1]['date']
             self.end_date = yesterday
             self.save()
 
-            prices = pynvest_connect.historical_prices(investment.symbol)
             for row in prices:
                 price, created = investment.historicalprice_set.get_or_create(date=row['date'], defaults={
                     'high': 0,
