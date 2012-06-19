@@ -1,4 +1,5 @@
 from . import models, util
+import django.db
 import pynvest_core.presenters
 import operator
 
@@ -29,10 +30,20 @@ class LotSummary(object):
         return [cls(ls) for (investment, ls) in util.groupbyrollup(lots, key=operator.attrgetter('investment'))]
 
 
+class LotGrowth(object):
+    def __init__(self, lot):
+        self.lot = lot
+
+    def value_at(self, date):
+        aggregate = self.lot.transaction_set.filter(date__lte=date).aggregate(django.db.models.Sum('shares'))
+        shares = aggregate['shares__sum'] or 0
+        return shares * self.lot.investment.price_at(date)
+
+
 class PortfolioGrowth(object):
     def __init__(self, portfolio):
-        transactions = models.Transaction.objects.filter(lot__portfolio=portfolio)
-        self.subgrowths = [pynvest_core.presenters.Growth(t.investment, t.date, t.value(), t.price) for t in transactions]
+        lots = portfolio.lot_set.all()
+        self.subgrowths = map(LotGrowth, lots)
 
     def value_at(self, date):
         return sum(g.value_at(date) for g in self.subgrowths)
