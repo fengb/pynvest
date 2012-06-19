@@ -40,10 +40,6 @@ class LotGrowth(object):
         return shares * self.lot.investment.price_at(date)
 
 
-class PortfolioGrowth(object):
-    def __init__(self, portfolio):
-        lots = portfolio.lot_set.all()
-        self.subgrowths = map(LotGrowth, lots)
-
-    def value_at(self, date):
-        return sum(g.value_at(date) for g in self.subgrowths)
+def PortfolioGrowth(portfolio):
+    lots = portfolio.lot_set.all()
+    return pynvest_core.presenters.GrowthAggregate(map(LotGrowth, lots))

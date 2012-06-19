@@ -15,3 +15,11 @@ class Growth(object):
             return 0
 
         return self.shares * self.investment.price_at(date)
+
+
+class GrowthAggregate(object):
+    def __init__(self, growths):
+        self.subgrowths = growths
+
+    def value_at(self, date):
+        return sum(g.value_at(date) for g in self.subgrowths)
