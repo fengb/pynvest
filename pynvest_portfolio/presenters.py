@@ -1,4 +1,5 @@
 from . import models, util
+import pynvest_core.presenters
 import operator
 
 
@@ -20,3 +21,12 @@ class LotSummary(object):
     @classmethod
     def group_by_investment(cls, lots):
         return [cls(ls) for (investment, ls) in util.groupbyrollup(lots, key=operator.attrgetter('investment'))]
+
+
+class PortfolioGrowth(object):
+    def __init__(self, portfolio):
+        transactions = models.Transaction.objects.filter(lot__portfolio=portfolio)
+        self.subgrowths = [pynvest_core.presenters.Growth(t.investment, t.date, t.value(), t.price) for t in transactions]
+
+    def value_at(self, date):
+        return sum(g.value_at(date) for g in self.subgrowths)
