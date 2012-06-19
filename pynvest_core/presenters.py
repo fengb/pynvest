@@ -19,7 +19,7 @@ class Growth(object):
 
 class GrowthAggregate(object):
     def __init__(self, growths):
-        self.subgrowths = growths
+        self.subgrowths = list(growths)
 
     def value_at(self, date):
         return sum(g.value_at(date) for g in self.subgrowths)

@@ -30,16 +30,17 @@ class LotSummary(object):
         return [cls(ls) for (investment, ls) in util.groupbyrollup(lots, key=operator.attrgetter('investment'))]
 
 
-class LotGrowth(object):
-    def __init__(self, lot):
-        self.lot = lot
+class PortfolioInvestmentGrowth(object):
+    def __init__(self, portfolio, investment):
+        self.portfolio = portfolio
+        self.investment = investment
 
     def value_at(self, date):
-        aggregate = self.lot.transaction_set.filter(date__lte=date).aggregate(django.db.models.Sum('shares'))
+        aggregate = models.Transaction.objects.filter(lot__portfolio=self.portfolio, lot__investment=self.investment, date__lte=date).aggregate(django.db.models.Sum('shares'))
         shares = aggregate['shares__sum'] or 0
-        return shares * self.lot.investment.price_at(date)
+        return shares * self.investment.price_at(date)
 
 
 def PortfolioGrowth(portfolio):
-    lots = portfolio.lot_set.all()
-    return pynvest_core.presenters.GrowthAggregate(map(LotGrowth, lots))
+    investments = set(lot.investment for lot in portfolio.lot_set.all())
+    return pynvest_core.presenters.GrowthAggregate(PortfolioInvestmentGrowth(portfolio, investment) for investment in investments)
