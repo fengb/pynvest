@@ -18,6 +18,12 @@ class LotSummary(object):
     def outstanding_shares(self):
         return sum(l.outstanding_shares for l in self.lots)
 
+    def current_price(self):
+        return self.investment().current_price()
+
+    def current_value(self):
+        return sum(l.current_value() for l in self.lots)
+
     @classmethod
     def group_by_investment(cls, lots):
         return [cls(ls) for (investment, ls) in util.groupbyrollup(lots, key=operator.attrgetter('investment'))]

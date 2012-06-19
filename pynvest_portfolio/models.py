@@ -20,6 +20,12 @@ class Lot(models.Model):
     def base_transaction(self):
         return self.transaction_set.order_by('date')[0]
 
+    def current_price(self):
+        return self.investment.current_price()
+
+    def current_value(self):
+        return self.current_price() * self.outstanding_shares
+
     objects = managers.AnnotatedLotManager()
 
 

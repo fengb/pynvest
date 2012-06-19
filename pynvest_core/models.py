@@ -3,6 +3,10 @@ import pynvest_connect
 import datetime
 
 
+def yesterday():
+    return datetime.date.today() - datetime.timedelta(1)
+
+
 class Exchange(models.Model):
     symbol          = models.CharField(max_length=10, unique=True)
     name            = models.CharField(max_length=200)
@@ -18,6 +22,9 @@ class Investment(models.Model):
 
     def __unicode__(self):
         return u'%s' % (self.symbol)
+
+    def current_price(self):
+        return self.price_at(yesterday())
 
     def price_at(self, target_date):
         '''latest close price <= target_date
@@ -61,8 +68,7 @@ class HistoricalPriceMeta(models.Model):
     @classmethod
     @transaction.commit_on_success
     def populate(cls, investment, target_date):
-        yesterday = datetime.date.today() - datetime.timedelta(1)
-        if target_date > yesterday:
+        if target_date > yesterday():
             raise ValueError('target_date must be in the past: %s' % target_date)
 
         self, created = cls.objects.get_or_create(investment=investment, defaults={
@@ -75,7 +81,7 @@ class HistoricalPriceMeta(models.Model):
             prices = pynvest_connect.historical_prices(investment.symbol)
 
             self.start_date = prices[-1]['date']
-            self.end_date = yesterday
+            self.end_date = yesterday()
             self.save()
 
             for row in prices:
