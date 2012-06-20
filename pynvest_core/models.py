@@ -67,6 +67,9 @@ class HistoricalPriceMeta(models.Model):
     @classmethod
     @transaction.commit_on_success
     def populate(cls, investment):
+        if isinstance(investment, basestring):
+            investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
+
         prices = pynvest_connect.historical_prices(investment.symbol)
 
         try:
