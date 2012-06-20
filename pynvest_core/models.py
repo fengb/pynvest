@@ -24,7 +24,7 @@ class Investment(models.Model):
         return u'%s' % (self.symbol)
 
     def current_price(self):
-        return self.price_at(yesterday())
+        return self.historicalprice_set.latest('date').close
 
     def price_at(self, target_date):
         '''latest close price <= target_date
@@ -42,7 +42,6 @@ class Investment(models.Model):
         >>> i.price_at(datetime.date(2011,11,24))
         <close price of 2011-11-23>
         '''
-        HistoricalPriceMeta.populate(self, target_date)
         return self.historicalprice_set.filter(date__lte=target_date).latest('date').close
 
 
