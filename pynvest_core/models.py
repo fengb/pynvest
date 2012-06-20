@@ -66,30 +66,28 @@ class HistoricalPriceMeta(models.Model):
 
     @classmethod
     @transaction.commit_on_success
-    def populate(cls, investment, target_date):
-        if target_date > yesterday():
-            raise ValueError('target_date must be in the past: %s' % target_date)
+    def populate(cls, investment):
+        prices = pynvest_connect.historical_prices(investment.symbol)
 
-        self, created = cls.objects.get_or_create(investment=investment, defaults={
-            # Dummy values to force data load
-            'start_date': datetime.date.today(),
-            'end_date': datetime.date.today(),
-        })
+        try:
+            self = cls.objects.get(investment=investment)
+        except cls.DoesNotExist:
+            self = cls(investment=investment)
 
-        if self.start_date > target_date or self.end_date < target_date:
-            prices = pynvest_connect.historical_prices(investment.symbol)
+        self.start_date = min(prices[-1]['date'], self.start_date or prices[-1]['date'])
+        self.end_date = max(prices[0]['date'], yesterday())
+        self.save()
 
-            self.start_date = prices[-1]['date']
-            self.end_date = yesterday()
-            self.save()
+        self.populate_prices(prices)
 
-            for row in prices:
-                price, created = investment.historicalprice_set.get_or_create(date=row['date'], defaults={
-                    'high': 0,
-                    'low': 0,
-                    'close': 0,
-                })
-                price.high = row['high']
-                price.low = row['low']
-                price.close = row['close']
-                price.save()
+    def populate_prices(self, prices):
+        for row in prices:
+            if self.investment.historicalprice_set.filter(date=row['date']).exists():
+                continue
+
+            price = self.investment.historicalprice_set.create(
+                date=row['date'],
+                high=row['high'],
+                low=row['low'],
+                close=row['close'],
+            )
