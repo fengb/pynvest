@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>High</th>
+        <th>Low</th>
+        <th>Close</th>
+      </tr>
+    </thead>
+    {% for price in prices %}
+      <tbody>
+        <tr>
+          <th>{{ price.date|date:'Y-m-d' }}</th>
+          <td>{{ price.high|floatformat:4 }}</td>
+          <td>{{ price.low|floatformat:4 }}</td>
+          <td>{{ price.close|floatformat:4 }}</td>
+        </tr>
+      </tbody>
+    {% endfor %}
+  </table>
+{% endblock content %}
