@@ -1,11 +1,10 @@
 Tax functionality:
 - Add transaction by lot or new lot.
 - Filter by date.
-- Realized gains.
 
 
 Organization:
-- Current price.
+- Daily price.
 - Unrealized gains.
 - Filter by active transactions.
 - Categorization.
