@@ -84,9 +84,10 @@ class HistoricalPriceMeta(models.Model):
         self.populate_prices(prices)
 
     def populate_prices(self, prices):
+        '''Short circuits upon first duplicate entry.'''
         for row in prices:
             if self.investment.historicalprice_set.filter(date=row['date']).exists():
-                continue
+                break
 
             price = self.investment.historicalprice_set.create(
                 date=row['date'],
