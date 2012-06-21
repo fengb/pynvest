@@ -12,6 +12,7 @@
         <th>Outstanding Shares</th>
         <th>Current Price</th>
         <th>Current Value</th>
+        <th>Unrealized Gain</th>
       </tr>
     </thead>
     {% for lot_summary in lot_summarys %}
@@ -23,6 +24,7 @@
           <td>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
           <td>{{ lot_summary.current_price|floatformat:4 }}</td>
           <td>{{ lot_summary.current_value|floatformat:4 }}</td>
+          <td>{{ lot_summary.unrealized_gain|floatformat:4 }}</td>
         </tr>
         {% if lot_summary.lots|length > 1 %}
           {% for lot in lot_summary.lots %}
@@ -33,6 +35,7 @@
               <td>{{ lot.outstanding_shares|floatformat:4 }}</td>
               <td>{{ lot.current_price|floatformat:4 }}</td>
               <td>{{ lot.current_value|floatformat:4 }}</td>
+              <td>{{ lot.unrealized_gain|floatformat:4 }}</td>
             </tr>
           {% endfor %}
         {% endif %}

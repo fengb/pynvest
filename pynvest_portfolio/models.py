@@ -32,6 +32,9 @@ class Lot(models.Model):
     def current_value(self):
         return self.current_price() * self.outstanding_shares
 
+    def unrealized_gain(self):
+        return (self.current_price() - self.purchase_price()) * self.outstanding_shares
+
     objects = managers.AnnotatedLotManager()
 
 

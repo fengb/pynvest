@@ -23,6 +23,12 @@ class LotSummary(object):
             return None
         return values[0]
 
+    def _sum_field(self, field):
+        return sum(getattr(lot, field) for lot in self.lots)
+
+    def _sum_callable(self, field):
+        return sum(getattr(lot, field)() for lot in self.lots)
+
     def investment(self):
         return self._unique_field('investment')
 
@@ -33,13 +39,16 @@ class LotSummary(object):
         return self._unique_callable('purchase_price')
 
     def outstanding_shares(self):
-        return sum(l.outstanding_shares for l in self.lots)
+        return self._sum_field('outstanding_shares')
 
     def current_price(self):
-        return self.investment().current_price()
+        return self._unique_callable('purchase_price')
 
     def current_value(self):
-        return sum(l.current_value() for l in self.lots)
+        return self._sum_callable('current_value')
+
+    def unrealized_gain(self):
+        return self._sum_callable('unrealized_gain')
 
     @classmethod
     def group_by_investment(cls, lots):
