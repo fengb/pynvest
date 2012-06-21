@@ -1,6 +1,8 @@
-table { border-collapse: collapse; }
+table { border-collapse:collapse; }
+thead { border-bottom:1px solid #000; }
 tbody th { text-align: left; border-right:1px solid black; }
 th,
-td { padding: 0 8px; text-align: right; }
+td { padding:0 8px; text-align:right; }
+tr.lot { color:#bbb; }
 
-tbody { border-bottom:1px solid black; }
+tbody { border-bottom:1px solid #888; }

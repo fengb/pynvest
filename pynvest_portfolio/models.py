@@ -20,6 +20,12 @@ class Lot(models.Model):
     def base_transaction(self):
         return self.transaction_set.order_by('date')[0]
 
+    def purchase_date(self):
+        return self.base_transaction().date
+
+    def purchase_price(self):
+        return self.base_transaction().price
+
     def current_price(self):
         return self.investment.current_price()
 

@@ -8,13 +8,29 @@ class LotSummary(object):
     def __init__(self, lots):
         if len(lots) < 1:
             raise ValueError
-        if len(set(l.investment for l in lots)) > 1:
-            raise ValueError
 
         self.lots = lots
 
+    def _unique_field(self, field):
+        values = map(operator.attrgetter(field), self.lots)
+        if len(set(values)) > 1:
+            return None
+        return values[0]
+
+    def _unique_callable(self, field):
+        values = [getattr(lot, field)() for lot in self.lots]
+        if len(set(values)) > 1:
+            return None
+        return values[0]
+
     def investment(self):
-        return self.lots[0].investment
+        return self._unique_field('investment')
+
+    def purchase_date(self):
+        return self._unique_callable('purchase_date')
+
+    def purchase_price(self):
+        return self._unique_callable('purchase_price')
 
     def outstanding_shares(self):
         return sum(l.outstanding_shares for l in self.lots)
