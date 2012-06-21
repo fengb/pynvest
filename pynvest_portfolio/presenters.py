@@ -11,44 +11,42 @@ class LotSummary(object):
 
         self.lots = lots
 
-    def _unique_field(self, field):
-        values = map(operator.attrgetter(field), self.lots)
-        if len(set(values)) > 1:
-            return None
-        return values[0]
+    def _values(self, field):
+        base = getattr(self.lots[0], field)
+        if callable(base):
+            return map(operator.methodcaller(field), self.lots)
+        else:
+            return map(operator.attrgetter(field), self.lots)
 
-    def _unique_callable(self, field):
-        values = [getattr(lot, field)() for lot in self.lots]
+    def _unique_field(self, field):
+        values = self._values(field)
         if len(set(values)) > 1:
             return None
         return values[0]
 
     def _sum_field(self, field):
-        return sum(getattr(lot, field) for lot in self.lots)
-
-    def _sum_callable(self, field):
-        return sum(getattr(lot, field)() for lot in self.lots)
+        return sum(self._values(field))
 
     def investment(self):
         return self._unique_field('investment')
 
     def purchase_date(self):
-        return self._unique_callable('purchase_date')
+        return self._unique_field('purchase_date')
 
     def purchase_price(self):
-        return self._unique_callable('purchase_price')
+        return self._unique_field('purchase_price')
 
     def outstanding_shares(self):
         return self._sum_field('outstanding_shares')
 
     def current_price(self):
-        return self._unique_callable('purchase_price')
+        return self._unique_field('current_price')
 
     def current_value(self):
-        return self._sum_callable('current_value')
+        return self._sum_field('current_value')
 
     def unrealized_gain(self):
-        return self._sum_callable('unrealized_gain')
+        return self._sum_field('unrealized_gain')
 
     @classmethod
     def group_by_investment(cls, lots):
