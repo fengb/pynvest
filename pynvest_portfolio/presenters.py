@@ -65,6 +65,12 @@ class PortfolioInvestmentGrowth(pynvest_core.presenters.InvestmentGrowth):
         aggregate = self.transactions.filter(date__lte=date).aggregate(django.db.models.Sum('shares'))
         return aggregate['shares__sum'] or 0
 
+    def cashflow_dates(self):
+        return self.transactions.values_list('date', flat=True)
+
+    def cashflow_at(self, date):
+        return sum(t.value() for t in self.transactions.filter(date=date))
+
 
 def PortfolioGrowth(portfolio):
     investments = set(lot.investment for lot in portfolio.lot_set.all())
