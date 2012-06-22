@@ -1,6 +1,10 @@
 '''Growth interface is any object that supports dict-like read-only interface:
-    g[spam]   -> number
-    iter(g)   -> date (sorted ascending order)
+    iter(g)            -> [date, ...] (ascending)
+    g[spam]            -> number
+    g.items()          -> [(date, number), ...] (ascending by date)
+
+    g.cashflow_dates() -> [date, ...] (ascending)
+    g.cashflow_at(d)   -> number
 '''
 
 
@@ -13,6 +17,8 @@ class InvestmentGrowth(object):
         investment
         start_date
         shares_at(date)
+        cashflow_dates()
+        cashflow_at(d)
     '''
     def __init__(self, *args, **kwargs):
         raise NotImplemented
@@ -32,6 +38,12 @@ class InvestmentGrowth(object):
     def items(self):
         return [(date, self[date]) for date in self]
 
+    def cashflow_dates(self):
+        raise NotImplemented
+
+    def cashflow_at(self, date):
+        raise NotImplemented
+
 
 class LumpSumGrowth(InvestmentGrowth):
     def __init__(self, investment, start_value, start_date=None, start_price=None):
@@ -45,21 +57,34 @@ class LumpSumGrowth(InvestmentGrowth):
     def shares_at(self, date):
         return self.shares
 
+    def cashflow_dates(self):
+        return [self.start_date]
+
+    def cashflow_at(self, date):
+        if date == self.start_date:
+            return self.start_value
+        return 0
+
 
 class AggregateGrowth(object):
     def __init__(self, growths):
         self.subgrowths = list(growths)
 
-    @classmethod
-    def iter_order_unique(cls, *growths):
+    def iter_order_unique(self, *growths):
         values = set(itertools.chain(*growths))
         return iter(sorted(values))
 
     def __iter__(self):
-        return AggregateGrowth.iter_order_unique(*self.subgrowths)
+        return self.iter_order_unique(*self.subgrowths)
 
     def __getitem__(self, date):
         return sum(g[date] for g in self.subgrowths)
 
     def items(self):
         return [(date, self[date]) for date in self]
+
+    def cashflow_dates(self):
+        return self.iter_order_unique(*[g.cashflow_dates() for g in self.subgrowths])
+
+    def cashflow_at(self, date):
+        return sum(g.cashflow_at(date) for g in self.subgrowths)
