@@ -60,3 +60,6 @@ class AggregateGrowth(object):
 
     def __getitem__(self, date):
         return sum(g[date] for g in self.subgrowths)
+
+    def items(self):
+        return [(date, self[date]) for date in self]

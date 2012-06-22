@@ -11,6 +11,14 @@ def portfolio_summary(request, id):
     })
 
 
+def portfolio_growth(request, id):
+    portfolio = get_object_or_404(models.Portfolio, id=id)
+    return render_to_response('pynvest_core/growth_table.html', {
+        'title': portfolio.name,
+        'growth': presenters.PortfolioGrowth(portfolio),
+    })
+
+
 def portfolio_sales(request, id, year):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, date__year=year)\
