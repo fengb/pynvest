@@ -1,15 +1,28 @@
 from django.shortcuts import render_to_response, get_object_or_404
-from . import models
+from . import models, presenters
+import decimal
 
 
-def historical_prices(request, symbol):
+def _investment(symbol):
     try:
-        investment = models.Investment.objects.get(symbol=symbol)
+        return models.Investment.objects.get(symbol=symbol)
     except models.Investment.DoesNotExist:
         models.HistoricalPriceMeta.populate(symbol)
-        investment = models.Investment.objects.get(symbol=symbol)
+        return get_object_or_404(Investment, symbol=symbol)
+
+def investment_historical_prices(request, symbol):
+    investment = _investment(symbol)
 
     return render_to_response('pynvest_core/historical_prices_table.html', {
         'title': investment.symbol,
         'prices': investment.historicalprice_set.order_by('-date'),
+    })
+
+
+def investment_growth(request, symbol):
+    investment = _investment(symbol)
+
+    return render_to_response('pynvest_core/growth_table.html', {
+        'title': investment.symbol,
+        'growth': presenters.LumpSumGrowth(investment, start_value=decimal.Decimal(10000))
     })

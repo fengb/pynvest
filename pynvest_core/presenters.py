@@ -29,13 +29,16 @@ class InvestmentGrowth(object):
 
         return self.shares_at(date) * self.investment.price_at(date)
 
+    def items(self):
+        return [(date, self[date]) for date in self]
+
 
 class LumpSumGrowth(InvestmentGrowth):
-    def __init__(self, investment, start_date, start_value, start_price=None):
+    def __init__(self, investment, start_value, start_date=None, start_price=None):
         self.investment = investment
-        self.start_date = start_date
         self.start_value = start_value
-        self.start_price = start_price or self.investment.price_at(start_date)
+        self.start_date = start_date or self.investment.historicalprice_set.order_by('date')[0].date
+        self.start_price = start_price or self.investment.price_at(self.start_date)
 
         self.shares = self.start_value / self.start_price
 
