@@ -10,59 +10,48 @@
 
 from . import models
 import itertools
+import operator
 
+
+DATE = 0
+SHARES = 1
+VALUE = 2
 
 class InvestmentGrowth(object):
-    '''Required subclass responsibilities:
-        investment
-        start_date
-        shares_at(date)
-        cashflow_dates()
-        cashflow_at(d)
-    '''
-    def __init__(self, *args, **kwargs):
-        raise NotImplemented
+    def __init__(self, investment, entries):
+        '''entries is a list of [(date, shares, value), ...]
+        '''
+        self.investment = investment
+        self.entries = entries
+        self.start_date = min(map(operator.itemgetter(DATE), entries))
+        self.dict_entries = dict((entry[DATE], entry) for entry in entries)
 
-    def shares_at(self, date):
-        raise NotImplemented
+    @classmethod
+    def lump_sum(cls, investment, start_value, start_date=None, start_price=None):
+        start_date = start_date or investment.historicalprice_set.order_by('date')[0].date
+        start_price = start_price or investment.price_at(start_date)
+        shares = start_value / start_price
+
+        return cls(investment, [(start_date, shares, start_price)])
 
     def __iter__(self):
         return iter(self.investment.historicalprice_set.filter(date__gte=self.start_date).order_by('date').values_list('date', flat=True))
 
-    def __getitem__(self, date):
-        if date < self.start_date:
-            return 0
+    def shares_at(self, target_date):
+        return sum(entry[SHARES] for entry in self.entries if entry[DATE] <= target_date)
 
+    def __getitem__(self, date):
         return self.shares_at(date) * self.investment.price_at(date)
 
     def items(self):
         return [(date, self[date]) for date in self]
 
     def cashflow_dates(self):
-        raise NotImplemented
+        return map(operator.itemgetter(DATE), self.entries)
 
     def cashflow_at(self, date):
-        raise NotImplemented
-
-
-class LumpSumGrowth(InvestmentGrowth):
-    def __init__(self, investment, start_value, start_date=None, start_price=None):
-        self.investment = investment
-        self.start_value = start_value
-        self.start_date = start_date or self.investment.historicalprice_set.order_by('date')[0].date
-        self.start_price = start_price or self.investment.price_at(self.start_date)
-
-        self.shares = self.start_value / self.start_price
-
-    def shares_at(self, date):
-        return self.shares
-
-    def cashflow_dates(self):
-        return [self.start_date]
-
-    def cashflow_at(self, date):
-        if date == self.start_date:
-            return self.start_value
+        if date in self.dict_entries:
+            return self.dict_entries[date][VALUE]
         return 0
 
 

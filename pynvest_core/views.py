@@ -24,5 +24,5 @@ def investment_growth(request, symbol):
 
     return render_to_response('pynvest_core/growth_table.html', {
         'title': investment.symbol,
-        'growth': presenters.LumpSumGrowth(investment, start_value=decimal.Decimal(10000))
+        'growth': presenters.InvestmentGrowth.lump_sum(investment, start_value=decimal.Decimal(10000))
     })
