@@ -3,14 +3,15 @@
     g[spam]            -> number
     g.items()          -> [(date, number), ...] (ascending by date)
 
-    g.cashflow_dates() -> [date, ...] (ascending)
-    g.cashflow_at(d)   -> number
+    g.cashflows() -> [(date, number), ...] (ascending by date)
 '''
 
 
 from . import models
 import itertools
 import operator
+import collections
+import decimal
 
 
 DATE = 0
@@ -19,8 +20,7 @@ VALUE = 2
 
 class InvestmentGrowth(object):
     def __init__(self, investment, entries):
-        '''entries is a list of [(date, shares, value), ...]
-        '''
+        '''entries is a list of [(date, shares, value), ...]'''
         self.investment = investment
         self.entries = entries
         self.start_date = min(map(operator.itemgetter(DATE), entries))
@@ -29,10 +29,17 @@ class InvestmentGrowth(object):
     @classmethod
     def lump_sum(cls, investment, start_value, start_date=None, start_price=None):
         start_date = start_date or investment.historicalprice_set.order_by('date')[0].date
-        start_price = start_price or investment.price_at(start_date)
-        shares = start_value / start_price
+        return cls.lump_sums(investment, [(start_date, start_value)])
 
-        return cls(investment, [(start_date, shares, start_price)])
+    @classmethod
+    def lump_sums(cls, investment, entries):
+        '''entries is a list of [(date, value), ...]'''
+        growth_entries = [(date, value / investment.price_at(date), value) for (date, value) in entries]
+        return cls(investment, growth_entries)
+
+    @classmethod
+    def benchmark(cls, investment, growth):
+        return cls.lump_sums(investment, growth.cashflows())
 
     def __iter__(self):
         return iter(self.investment.historicalprice_set.filter(date__gte=self.start_date).order_by('date').values_list('date', flat=True))
@@ -46,13 +53,8 @@ class InvestmentGrowth(object):
     def items(self):
         return [(date, self[date]) for date in self]
 
-    def cashflow_dates(self):
-        return map(operator.itemgetter(DATE), self.entries)
-
-    def cashflow_at(self, date):
-        if date in self.dict_entries:
-            return self.dict_entries[date][VALUE]
-        return 0
+    def cashflows(self):
+        return [(entry[DATE], entry[VALUE]) for entry in self.entries]
 
 
 class AggregateGrowth(object):
@@ -72,8 +74,10 @@ class AggregateGrowth(object):
     def items(self):
         return [(date, self[date]) for date in self]
 
-    def cashflow_dates(self):
-        return self.iter_order_unique(*[g.cashflow_dates() for g in self.subgrowths])
+    def cashflows(self):
+        all_cashflows = collections.defaultdict(decimal.Decimal)
+        for growth in self.subgrowths:
+            for (date, value) in growth.cashflows():
+                all_cashflows[date] += value
 
-    def cashflow_at(self, date):
-        return sum(g.cashflow_at(date) for g in self.subgrowths)
+        return sorted(all_cashflows.items())
