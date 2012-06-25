@@ -53,23 +53,10 @@ class LotSummary(object):
         return [cls(ls) for (investment, ls) in util.groupbyrollup(lots, key=operator.attrgetter('investment'))]
 
 
-class PortfolioInvestmentGrowth(pynvest_core.presenters.InvestmentGrowth):
-    def __init__(self, portfolio, investment):
-        self.transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
-
-        self.investment = investment
-        # Why isn't there an 'earliest' method? :(
-        self.start_date = self.transactions.order_by('date')[:1].get().date
-
-    def shares_at(self, date):
-        aggregate = self.transactions.filter(date__lte=date).aggregate(django.db.models.Sum('shares'))
-        return aggregate['shares__sum'] or 0
-
-    def cashflow_dates(self):
-        return self.transactions.values_list('date', flat=True)
-
-    def cashflow_at(self, date):
-        return sum(t.value() for t in self.transactions.filter(date=date))
+def PortfolioInvestmentGrowth(portfolio, investment):
+    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
+    entries = [(transaction.date, transaction.shares, transaction.value()) for transaction in transactions]
+    return pynvest_core.presenters.InvestmentGrowth(investment, entries)
 
 
 def PortfolioGrowth(portfolio):
