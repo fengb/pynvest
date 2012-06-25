@@ -27,8 +27,7 @@ class InvestmentGrowth(object):
         self.dict_entries = dict((entry[DATE], entry) for entry in entries)
 
     @classmethod
-    def lump_sum(cls, investment, start_value, start_date=None, start_price=None):
-        start_date = start_date or investment.historicalprice_set.order_by('date')[0].date
+    def lump_sum(cls, investment, start_date, start_value):
         return cls.lump_sums(investment, [(start_date, start_value)])
 
     @classmethod
