@@ -14,17 +14,13 @@ import collections
 import decimal
 
 
-DATE = 0
-SHARES = 1
-VALUE = 2
+InvestmentGrowthEntry = collections.namedtuple('GrowthEntry', 'date shares value')
 
 class InvestmentGrowth(object):
     def __init__(self, investment, entries):
-        '''entries is a list of [(date, shares, value), ...]'''
         self.investment = investment
         self.entries = entries
-        self.start_date = min(map(operator.itemgetter(DATE), entries))
-        self.dict_entries = dict((entry[DATE], entry) for entry in entries)
+        self.start_date = min(map(operator.attrgetter('date'), self.entries))
 
     @classmethod
     def lump_sum(cls, investment, start_date, start_value):
@@ -33,7 +29,7 @@ class InvestmentGrowth(object):
     @classmethod
     def lump_sums(cls, investment, entries):
         '''entries is a list of [(date, value), ...]'''
-        growth_entries = [(date, value / investment.price_at(date), value) for (date, value) in entries]
+        growth_entries = [InvestmentGrowthEntry(date, value / investment.price_at(date), value) for (date, value) in entries]
         return cls(investment, growth_entries)
 
     @classmethod
@@ -44,7 +40,7 @@ class InvestmentGrowth(object):
         return iter(self.investment.historicalprice_set.filter(date__gte=self.start_date).order_by('date').values_list('date', flat=True))
 
     def shares_at(self, target_date):
-        return sum(entry[SHARES] for entry in self.entries if entry[DATE] <= target_date)
+        return sum(entry.shares for entry in self.entries if entry.date <= target_date)
 
     def __getitem__(self, date):
         return self.shares_at(date) * self.investment.price_at(date)
@@ -53,7 +49,7 @@ class InvestmentGrowth(object):
         return [(date, self[date]) for date in self]
 
     def cashflows(self):
-        return [(entry[DATE], entry[VALUE]) for entry in self.entries]
+        return [(entry.date, entry.value) for entry in self.entries]
 
 
 class AggregateGrowth(object):
