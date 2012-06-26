@@ -55,7 +55,8 @@ class LotSummary(object):
 
 def PortfolioInvestmentGrowth(portfolio, investment):
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
-    entries = [(transaction.date, transaction.shares, transaction.value()) for transaction in transactions]
+    entries = [pynvest_core.presenters.InvestmentGrowthEntry(transaction.date, transaction.shares, transaction.value())
+                  for transaction in transactions]
     return pynvest_core.presenters.InvestmentGrowth(investment, entries)
 
 
