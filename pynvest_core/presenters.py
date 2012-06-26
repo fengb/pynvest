@@ -12,15 +12,36 @@ import itertools
 import operator
 import collections
 import decimal
+import bisect
+
+
+class PriceFinder(object):
+    def __init__(self, investment):
+        self.dates_prices = list(models.HistoricalPrice.objects.filter(investment=investment).order_by('date').values_list('date', 'close'))
+
+    def __iter__(self):
+        return iter(self.keys())
+
+    def keys(self):
+        return map(operator.itemgetter(0), self.dates_prices)
+
+    def __getitem__(self, date):
+        # Make sure this fake value is always greater than the search value such that (sdate, svalue) < (date, value) when sdate == date
+        value = decimal.Decimal('inf')
+        i = bisect.bisect(self.dates_prices, (date, value))
+
+        # i points at match + 1
+        return self.dates_prices[i - 1][1]
 
 
 InvestmentGrowthEntry = collections.namedtuple('GrowthEntry', 'date shares value')
 
 class InvestmentGrowth(object):
-    def __init__(self, investment, entries):
+    def __init__(self, investment, entries, price_finder=None):
         self.investment = investment
         self.entries = entries
         self.start_date = min(map(operator.attrgetter('date'), self.entries))
+        self.price_finder = price_finder or PriceFinder(self.investment)
 
     @classmethod
     def lump_sum(cls, investment, start_date, start_value):
@@ -29,21 +50,22 @@ class InvestmentGrowth(object):
     @classmethod
     def lump_sums(cls, investment, entries):
         '''entries is a list of [(date, value), ...]'''
-        growth_entries = [InvestmentGrowthEntry(date, value / investment.price_at(date), value) for (date, value) in entries]
-        return cls(investment, growth_entries)
+        price_finder = PriceFinder(investment)
+        growth_entries = [InvestmentGrowthEntry(date, value / price_finder[date], value) for (date, value) in entries]
+        return cls(investment, growth_entries, price_finder=price_finder)
 
     @classmethod
     def benchmark(cls, investment, growth):
         return cls.lump_sums(investment, growth.cashflows())
 
     def __iter__(self):
-        return iter(self.investment.historicalprice_set.filter(date__gte=self.start_date).order_by('date').values_list('date', flat=True))
+        return iter(key for key in self.price_finder.keys() if key >= self.start_date)
 
     def shares_at(self, target_date):
         return sum(entry.shares for entry in self.entries if entry.date <= target_date)
 
     def __getitem__(self, date):
-        return self.shares_at(date) * self.investment.price_at(date)
+        return self.shares_at(date) * self.price_finder[date]
 
     def items(self):
         return [(date, self[date]) for date in self]
