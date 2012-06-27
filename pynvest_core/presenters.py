@@ -22,14 +22,13 @@ def PriceFinder(investment, start_date=None):
     return utils.BinarySearchThing(items)
 
 
-InvestmentGrowthEntry = collections.namedtuple('GrowthEntry', 'date shares value')
-
 class InvestmentGrowth(object):
     def __init__(self, investment, entries, price_finder=None):
+        '''entries - [(date, shares, value), ...]'''
         self.investment = investment
-        self.entries = entries
-        self.start_date = min(entry.date for entry in entries)
+        self.start_date = min(entry[0] for entry in entries)
         self.price_finder = price_finder or PriceFinder(self.investment, self.start_date)
+        self._cashflows = sorted([(date, value) for (date, shares, value) in entries], key=operator.itemgetter(0))
 
         shares_items = []
         sum = decimal.Decimal()
@@ -46,7 +45,7 @@ class InvestmentGrowth(object):
     def lump_sums(cls, investment, entries):
         '''entries is a list of [(date, value), ...]'''
         price_finder = PriceFinder(investment, min(entry[0] for entry in entries))
-        growth_entries = [InvestmentGrowthEntry(date, value / price_finder[date], value) for (date, value) in entries]
+        growth_entries = [(date, value / price_finder[date], value) for (date, value) in entries]
         return cls(investment, growth_entries, price_finder=price_finder)
 
     @classmethod
@@ -66,7 +65,7 @@ class InvestmentGrowth(object):
         return [(date, self[date]) for date in self]
 
     def cashflows(self):
-        return [(entry.date, entry.value) for entry in self.entries]
+        return self._cashflows
 
 
 class AggregateGrowth(object):
