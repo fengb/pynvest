@@ -57,10 +57,10 @@ class InvestmentGrowth(object):
         return iter(key for key in self.price_finder.keys() if key >= self.start_date)
 
     def __getitem__(self, date):
-        try:
-            return self.shares_finder[date] * self.price_finder[date]
-        except ValueError:
-            return decimal.Decimal()
+        if date < self.start_date:
+            return 0
+
+        return self.shares_finder[date] * self.price_finder[date]
 
     def items(self):
         return [(date, self[date]) for date in self]
@@ -87,7 +87,7 @@ class AggregateGrowth(object):
         return [(date, self[date]) for date in self]
 
     def cashflows(self):
-        all_cashflows = collections.defaultdict(decimal.Decimal)
+        all_cashflows = collections.defaultdict(0)
         for growth in self.subgrowths:
             for (date, value) in growth.cashflows():
                 all_cashflows[date] += value
