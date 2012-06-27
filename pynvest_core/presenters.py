@@ -16,8 +16,11 @@ import bisect
 
 
 class PriceFinder(object):
-    def __init__(self, investment):
-        self.dates_prices = list(models.HistoricalPrice.objects.filter(investment=investment).order_by('date').values_list('date', 'close'))
+    def __init__(self, investment, start_date=None):
+        filter_args = {'investment': investment}
+        if start_date:
+            filter_args['date__gte'] = start_date
+        self.dates_prices = list(models.HistoricalPrice.objects.filter(**filter_args).order_by('date').values_list('date', 'close'))
 
     def __iter__(self):
         return iter(self.keys())
@@ -40,8 +43,8 @@ class InvestmentGrowth(object):
     def __init__(self, investment, entries, price_finder=None):
         self.investment = investment
         self.entries = entries
-        self.start_date = min(map(operator.attrgetter('date'), self.entries))
-        self.price_finder = price_finder or PriceFinder(self.investment)
+        self.start_date = min(entry.date for entry in entries)
+        self.price_finder = price_finder or PriceFinder(self.investment, self.start_date)
 
     @classmethod
     def lump_sum(cls, investment, start_date, start_value):
@@ -50,7 +53,7 @@ class InvestmentGrowth(object):
     @classmethod
     def lump_sums(cls, investment, entries):
         '''entries is a list of [(date, value), ...]'''
-        price_finder = PriceFinder(investment)
+        price_finder = PriceFinder(investment, min(entry[0] for entry in entries))
         growth_entries = [InvestmentGrowthEntry(date, value / price_finder[date], value) for (date, value) in entries]
         return cls(investment, growth_entries, price_finder=price_finder)
 
