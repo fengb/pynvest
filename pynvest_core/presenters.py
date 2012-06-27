@@ -31,6 +31,13 @@ class InvestmentGrowth(object):
         self.start_date = min(entry.date for entry in entries)
         self.price_finder = price_finder or PriceFinder(self.investment, self.start_date)
 
+        shares_items = []
+        sum = decimal.Decimal()
+        for (date, shares, value) in sorted(entries):
+            sum += shares
+            shares_items.append((date, sum))
+        self.shares_finder = utils.BinarySearchThing(shares_items)
+
     @classmethod
     def lump_sum(cls, investment, start_date, start_value):
         return cls.lump_sums(investment, [(start_date, start_value)])
@@ -49,11 +56,11 @@ class InvestmentGrowth(object):
     def __iter__(self):
         return iter(key for key in self.price_finder.keys() if key >= self.start_date)
 
-    def shares_at(self, target_date):
-        return sum(entry.shares for entry in self.entries if entry.date <= target_date)
-
     def __getitem__(self, date):
-        return self.shares_at(date) * self.price_finder[date]
+        try:
+            return self.shares_finder[date] * self.price_finder[date]
+        except ValueError:
+            return decimal.Decimal()
 
     def items(self):
         return [(date, self[date]) for date in self]

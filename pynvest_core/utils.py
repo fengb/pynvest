@@ -29,6 +29,8 @@ class BinarySearchThing(object):
 
     def __getitem__(self, key):
         i = bisect.bisect(self._keys, key)
+        if i == 0:
+            raise ValueError
 
         # i points at match + 1
         return self._items[i - 1][1]
