@@ -7,34 +7,19 @@
 '''
 
 
-from . import models
+from . import models, utils
 import itertools
 import operator
 import collections
 import decimal
-import bisect
 
 
-class PriceFinder(object):
-    def __init__(self, investment, start_date=None):
-        filter_args = {'investment': investment}
-        if start_date:
-            filter_args['date__gte'] = start_date
-        self.dates_prices = list(models.HistoricalPrice.objects.filter(**filter_args).order_by('date').values_list('date', 'close'))
-
-    def __iter__(self):
-        return iter(self.keys())
-
-    def keys(self):
-        return map(operator.itemgetter(0), self.dates_prices)
-
-    def __getitem__(self, date):
-        # Make sure this fake value is always greater than the search value such that (sdate, svalue) < (date, value) when sdate == date
-        value = decimal.Decimal('inf')
-        i = bisect.bisect(self.dates_prices, (date, value))
-
-        # i points at match + 1
-        return self.dates_prices[i - 1][1]
+def PriceFinder(investment, start_date=None):
+    filter_args = {'investment': investment}
+    if start_date:
+        filter_args['date__gte'] = start_date
+    items = list(models.HistoricalPrice.objects.filter(**filter_args).order_by('date').values_list('date', 'close'))
+    return utils.BinarySearchThing(items)
 
 
 InvestmentGrowthEntry = collections.namedtuple('GrowthEntry', 'date shares value')
