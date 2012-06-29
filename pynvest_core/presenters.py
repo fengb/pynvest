@@ -15,10 +15,17 @@ import decimal
 
 
 def PriceFinder(investment, start_date=None):
-    filter_args = {'investment': investment}
+    filter_args = {}
     if start_date:
-        filter_args['date__gte'] = start_date
-    items = list(models.HistoricalPrice.objects.filter(**filter_args).order_by('date').values_list('date', 'close'))
+        # start_date may not have a price entry.  We need to backtrack to find the real start date.
+        search_start_date = investment.historicalprice_set.filter(date__lte=start_date).latest('date').date
+        filter_args['date__gte'] = search_start_date
+
+    items = list(investment.historicalprice_set.filter(**filter_args).order_by('date').values_list('date', 'close'))
+
+    if start_date and items[0][0] != start_date:
+        # hard cutoff at start_date
+        items[0] = (start_date, items[0][1])
     return utils.BinarySearchThing(items)
 
 
@@ -53,7 +60,7 @@ class InvestmentGrowth(object):
         return cls.lump_sums(investment, growth.cashflows())
 
     def __iter__(self):
-        return iter(key for key in self.price_finder.keys() if key >= self.start_date)
+        return iter(self.price_finder)
 
     def __getitem__(self, date):
         if date < self.start_date:
