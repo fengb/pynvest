@@ -1,4 +1,5 @@
 import urllib2
+import collections
 import csv
 import datetime
 import decimal
@@ -32,7 +33,7 @@ def historical_prices(symbol, start_date=None, end_date=None):
     try:
         raw = csv.reader(response)
 
-        directives = map(str.lower, next(raw))
-        return [dict(zip(directives, map(_convert, row))) for row in raw]
+        tuple = collections.namedtuple('RawPrice', [directive.lower().replace(' ', '_') for directive in next(raw)])
+        return [tuple(*map(_convert, row)) for row in raw]
     finally:
         response.close()

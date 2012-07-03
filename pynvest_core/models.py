@@ -77,8 +77,8 @@ class HistoricalPriceMeta(models.Model):
         except cls.DoesNotExist:
             self = cls(investment=investment)
 
-        self.start_date = min(prices[-1]['date'], self.start_date or prices[-1]['date'])
-        self.end_date = max(prices[0]['date'], yesterday())
+        self.start_date = min(prices[-1].date, self.start_date or prices[-1].date)
+        self.end_date = max(prices[0].date, yesterday())
         self.save()
 
         self.populate_prices(prices)
@@ -86,12 +86,13 @@ class HistoricalPriceMeta(models.Model):
     def populate_prices(self, prices):
         '''Short circuits upon first duplicate entry.'''
         for row in prices:
-            if self.investment.historicalprice_set.filter(date=row['date']).exists():
+            if self.investment.historicalprice_set.filter(date=row.date).exists():
                 break
 
-            price = self.investment.historicalprice_set.create(
-                date=row['date'],
-                high=row['high'],
-                low=row['low'],
-                close=row['close'],
+            price = HistoricalPrice.objects.create(
+                investment=self.investment,
+                date=row.date,
+                high=row.high,
+                low=row.low,
+                close=row.close,
             )
