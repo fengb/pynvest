@@ -1,15 +1,8 @@
 import urllib2
 import collections
 import csv
-import datetime
-import decimal
 
-
-def _convert(field):
-    if '-' in field:
-        return datetime.date(*map(int, field.split('-')))
-    else:
-        return decimal.Decimal(field)
+from . import util
 
 
 def historical_prices(symbol, start_date=None, end_date=None):
@@ -34,7 +27,7 @@ def historical_prices(symbol, start_date=None, end_date=None):
         raw = csv.reader(response)
 
         tuple = collections.namedtuple('RawPrice', [directive.lower().replace(' ', '_') for directive in next(raw)])
-        return [tuple(*map(_convert, row)) for row in raw]
+        return [tuple(*map(util.convert_string, row)) for row in raw]
     finally:
         response.close()
 
@@ -52,6 +45,6 @@ def current_values(symbol):
     response = urllib2.urlopen('http://finance.yahoo.com/d/quotes.csv?' + '&'.join(params))
     try:
         raw = csv.reader(response)
-        return _FIELDS_TUPLE(*map(_convert, next(raw)))
+        return _FIELDS_TUPLE(*map(util.convert_string, next(raw)))
     finally:
         response.close()

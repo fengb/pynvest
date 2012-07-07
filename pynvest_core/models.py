@@ -1,5 +1,5 @@
 from django.db import models, transaction
-import pynvest_connect
+import pynvest_connect.yahoo
 import datetime
 
 
@@ -70,7 +70,7 @@ class HistoricalPriceMeta(models.Model):
         if isinstance(investment, basestring):
             investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
 
-        prices = pynvest_connect.historical_prices(investment.symbol)
+        prices = pynvest_connect.yahoo.historical_prices(investment.symbol)
 
         try:
             self = cls.objects.get(investment=investment)
