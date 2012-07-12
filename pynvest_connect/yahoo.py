@@ -5,9 +5,8 @@ import csv
 from . import util
 
 
-def historical_prices(symbol, start_date=None, end_date=None):
+def _ichart_request(params, start_date, end_date):
     # Yahoo API is really terrible... abcdef go!
-    params = ['s=%s' % symbol]
     if start_date:
         params.extend([
             # POSIX date means January=0, February=1, etc.
@@ -21,12 +20,26 @@ def historical_prices(symbol, start_date=None, end_date=None):
             'e=%d' % (end_date.day),
             'f=%d' % (end_date.year),
         ])
+    return urllib2.urlopen('http://ichart.finance.yahoo.com/table.csv?' + '&'.join(params))
 
-    response = urllib2.urlopen('http://ichart.finance.yahoo.com/table.csv?' + '&'.join(params))
+
+def historical_prices(symbol, start_date=None, end_date=None):
+    response = _ichart_request(['s=%s' % symbol], start_date, end_date)
     try:
         raw = csv.reader(response)
 
-        tuple = collections.namedtuple('RawPrice', [directive.lower().replace(' ', '_') for directive in next(raw)])
+        tuple = collections.namedtuple('HistoricalPrice', [directive.lower().replace(' ', '_') for directive in next(raw)])
+        return [tuple(*map(util.convert_string, row)) for row in raw]
+    finally:
+        response.close()
+
+
+def dividends(symbol, start_date=None, end_date=None):
+    response = _ichart_request(['s=%s' % symbol, 'g=v'], start_date, end_date)
+    try:
+        raw = csv.reader(response)
+
+        tuple = collections.namedtuple('Dividend', [directive.lower() for directive in next(raw)])
         return [tuple(*map(util.convert_string, row)) for row in raw]
     finally:
         response.close()
