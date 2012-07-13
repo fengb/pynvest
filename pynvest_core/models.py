@@ -29,18 +29,6 @@ class Investment(models.Model):
     def price_at(self, target_date):
         '''latest close price <= target_date
         Cannot do simple == target_date because weekends/holidays do not have prices
-
-        Example:
-        >>> i.price_at(datetime.date(2011,11,25))
-        <close price of 2011-11-25>
-
-        # Saturday
-        >>> i.price_at(datetime.date(2011,11,26))
-        <close price of 2011-11-25>
-
-        # Thanksgiving
-        >>> i.price_at(datetime.date(2011,11,24))
-        <close price of 2011-11-23>
         '''
         return self.historicalprice_set.filter(date__lte=target_date).latest('date').close
 
