@@ -9,7 +9,7 @@ class TestHistoricalPrices(object):
 
         assert len(prices) == 1
         assert prices[0].date == datetime.date(2012, 3, 12)
-        assert str(prices[0].close + 0) == '70.15'
+        assert prices[0].close * 100 == 7015
 
     def test_multiple_dates_in_reverse_order(self):
         prices = pynvest_connect.yahoo.historical_prices('KO', start_date=datetime.date(2012, 3, 12), end_date=datetime.date(2012, 3, 14))
@@ -31,7 +31,7 @@ class TestHistoricalPrices(object):
 
         assert len(prices) == 1
         assert prices[0].date == datetime.date(2012, 3, 12)
-        assert str(prices[0].close + 0) == '79.54'
+        assert prices[0].close * 100 == 7954
 
 
 class TestDividends(object):
@@ -39,7 +39,7 @@ class TestDividends(object):
         dividends = pynvest_connect.yahoo.dividends('KO', start_date=datetime.date(2012, 3, 13), end_date=datetime.date(2012, 3, 13))
 
         assert len(dividends) == 1
-        assert str(dividends[0].amount + 0) == '0.51'
+        assert dividends[0].amount * 100 == 51
 
     def test_multiple_dividends_in_reverse_order(self):
         dividends = pynvest_connect.yahoo.dividends('KO', start_date=datetime.date(2012, 3, 13), end_date=datetime.date(2012, 6, 13))

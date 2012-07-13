@@ -34,13 +34,14 @@ def historical_prices(symbol, start_date=None, end_date=None):
         response.close()
 
 
+_DIVIDEND_TUPLE = collections.namedtuple('Dividend', 'date amount')
 def dividends(symbol, start_date=None, end_date=None):
     response = _ichart_request(['s=%s' % symbol, 'g=v'], start_date, end_date)
     try:
         raw = csv.reader(response)
 
-        tuple = collections.namedtuple('Dividend', [directive.lower() for directive in next(raw)])
-        return [tuple(*map(util.convert_string, row)) for row in raw]
+        next(raw) # Eat the headers
+        return [_DIVIDEND_TUPLE(*map(util.convert_string, row)) for row in raw]
     finally:
         response.close()
 
