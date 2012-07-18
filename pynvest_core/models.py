@@ -57,6 +57,8 @@ class Snapshot(models.Model):
     def __unicode__(self):
         return u'%s %s %s' % (self.investment, self.date, self.close)
 
+    class Meta:
+        unique_together = [('investment', 'date')]
 
     @classmethod
     @transaction.commit_on_success
@@ -65,10 +67,10 @@ class Snapshot(models.Model):
             investments = Investment.objects.all()
 
         for investment in investments:
-            try:
-                if isinstance(investment, basestring):
-                    investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
+            if isinstance(investment, basestring):
+                investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
 
+            try:
                 populated_dates = set(investment.snapshot_set.values_list('date', flat=True))
                 prices = pynvest_connect.yahoo.historical_prices(investment.symbol)
                 for row in prices:
@@ -94,3 +96,6 @@ class Snapshot(models.Model):
             except urllib2.HTTPError, e:
                 if e.code != 404:
                     raise
+                else:
+                    # Not found but continue anyway
+                    pass
