@@ -34,13 +34,14 @@ def historical_prices(symbol, start_date=None, end_date=None):
         response.close()
 
 
+_DIVIDENDS_TUPLE = collections.namedtuple('Dividend', 'date amount')
 def dividends(symbol, start_date=None, end_date=None):
     response = _ichart_request(['s=%s' % symbol, 'g=v'], start_date, end_date)
     try:
         raw = csv.reader(response)
 
-        tuple = collections.namedtuple('Dividend', [directive.lower() for directive in next(raw)])
-        return [tuple(*map(util.convert_string, row)) for row in raw]
+        next(raw) # remove directives row
+        return [_DIVIDENDS_TUPLE(*map(util.convert_string, row)) for row in raw]
     finally:
         response.close()
 
@@ -51,7 +52,6 @@ _FIELDS = {
 }
 _FIELDS_REMOTE = _FIELDS.keys()
 _FIELDS_TUPLE = collections.namedtuple('CurrentValues', _FIELDS.values())
-
 def current_values(symbol):
     params = ['s=%s' % symbol, 'f=%s' % ''.join(_FIELDS_REMOTE)]
 

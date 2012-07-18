@@ -1,6 +1,7 @@
 from django.db import models, transaction
 import pynvest_connect.yahoo
 import datetime
+import urllib2
 
 
 def yesterday():
@@ -45,88 +46,51 @@ class Investment(models.Model):
         return self.historicalprice_set.filter(date__lte=target_date).latest('date').close
 
 
-class HistoricalPrice(models.Model):
+class Snapshot(models.Model):
     investment      = models.ForeignKey(Investment)
     date            = models.DateField()
     high            = models.DecimalField(max_digits=12, decimal_places=4)
     low             = models.DecimalField(max_digits=12, decimal_places=4)
     close           = models.DecimalField(max_digits=12, decimal_places=4)
+    dividend        = models.DecimalField(max_digits=12, decimal_places=4, default=0)
 
     def __unicode__(self):
         return u'%s %s %s' % (self.investment, self.date, self.close)
 
 
-class Dividend(models.Model):
-    investment      = models.ForeignKey(Investment)
-    date            = models.DateField()
-    amount          = models.DecimalField(max_digits=12, decimal_places=4)
-
-
-class HistoricalPriceMeta(models.Model):
-    investment      = models.OneToOneField(Investment)
-    start_date      = models.DateField()
-    end_date        = models.DateField()
-
     @classmethod
     @transaction.commit_on_success
-    def populate(cls, investment):
-        if isinstance(investment, basestring):
-            investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
+    def batch_populate(cls, *investments):
+        if not investments:
+            investments = Investment.objects.all()
 
-        prices = pynvest_connect.yahoo.historical_prices(investment.symbol)
+        for investment in investments:
+            try:
+                if isinstance(investment, basestring):
+                    investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
 
-        try:
-            self = cls.objects.get(investment=investment)
-        except cls.DoesNotExist:
-            self = cls(investment=investment)
+                populated_dates = set(investment.snapshot_set.values_list('date', flat=True))
+                prices = pynvest_connect.yahoo.historical_prices(investment.symbol)
+                for row in prices:
+                    if row.date in populated_dates:
+                        break
 
-        self.start_date = min(prices[-1].date, self.start_date or prices[-1].date)
-        self.end_date = max(prices[0].date, yesterday())
-        self.save()
+                    snapshot = Snapshot.objects.create(
+                        investment=investment,
+                        date=row.date,
+                        high=row.high,
+                        low=row.low,
+                        close=row.close,
+                    )
 
-        populated_dates = set(self.investment.historicalprice_set.values_list('date', flat=True))
-        for row in prices:
-            if row.date in populated_dates:
-                break
+                dividends = pynvest_connect.yahoo.dividends(investment.symbol)
+                for dividend in dividends:
+                    snapshot = investment.snapshot_set.get(date=dividend.date)
+                    if snapshot.dividend:
+                          break
 
-            price = HistoricalPrice.objects.create(
-                investment=self.investment,
-                date=row.date,
-                high=row.high,
-                low=row.low,
-                close=row.close,
-            )
-
-
-class DividendMeta(models.Model):
-    investment      = models.OneToOneField(Investment)
-    start_date      = models.DateField()
-    end_date        = models.DateField()
-
-    @classmethod
-    @transaction.commit_on_success
-    def populate(cls, investment):
-        if isinstance(investment, basestring):
-            investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
-
-        prices = pynvest_connect.yahoo.dividends(investment.symbol)
-
-        try:
-            self = cls.objects.get(investment=investment)
-        except cls.DoesNotExist:
-            self = cls(investment=investment)
-
-        self.start_date = min(prices[-1].date, self.start_date or prices[-1].date)
-        self.end_date = max(prices[0].date, yesterday())
-        self.save()
-
-        populated_dates = set(self.investment.dividend_set.values_list('date', flat=True))
-        for row in prices:
-            if row.date in populated_dates:
-                break
-
-            dividend = Dividend.objects.create(
-                investment=self.investment,
-                date=row.date,
-                amount=row.dividends,
-            )
+                    snapshot.dividend = dividend.amount
+                    snapshot.save()
+            except urllib2.HTTPError, e:
+                if e.code != 404:
+                    raise
