@@ -1,8 +1,15 @@
 import urllib2
 import collections
 import csv
+import datetime
+import decimal
 
-from . import shared
+
+def convert_string(field, strptime_string=None, strptime_cache={}):
+    if '-' in field:
+        return datetime.date(*map(int, field.split('-')))
+    else:
+        return decimal.Decimal(field)
 
 
 def _ichart_request(params, start_date, end_date):
@@ -29,19 +36,19 @@ def historical_prices(symbol, start_date=None, end_date=None):
         raw = csv.reader(response)
 
         tuple = collections.namedtuple('HistoricalPrice', [directive.lower().replace(' ', '_') for directive in next(raw)])
-        return [tuple(*map(shared.convert_string, row)) for row in raw]
+        return [tuple(*map(convert_string, row)) for row in raw]
     finally:
         response.close()
 
 
-_DIVIDEND_TUPLE = collections.namedtuple('Dividend', 'date amount')
+_DIVIDENDS_TUPLE = collections.namedtuple('Dividend', 'date amount')
 def dividends(symbol, start_date=None, end_date=None):
     response = _ichart_request(['s=%s' % symbol, 'g=v'], start_date, end_date)
     try:
         raw = csv.reader(response)
 
-        next(raw) # Eat the headers
-        return [_DIVIDEND_TUPLE(*map(shared.convert_string, row)) for row in raw]
+        next(raw) # remove directives row
+        return [_DIVIDENDS_TUPLE(*map(convert_string, row)) for row in raw]
     finally:
         response.close()
 
@@ -52,13 +59,12 @@ _FIELDS = {
 }
 _FIELDS_REMOTE = _FIELDS.keys()
 _FIELDS_TUPLE = collections.namedtuple('CurrentValues', _FIELDS.values())
-
 def current_values(symbol):
     params = ['s=%s' % symbol, 'f=%s' % ''.join(_FIELDS_REMOTE)]
 
     response = urllib2.urlopen('http://finance.yahoo.com/d/quotes.csv?' + '&'.join(params))
     try:
         raw = csv.reader(response)
-        return _FIELDS_TUPLE(*map(shared.convert_string, next(raw)))
+        return _FIELDS_TUPLE(*map(convert_string, next(raw)))
     finally:
         response.close()
