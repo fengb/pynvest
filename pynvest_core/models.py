@@ -25,7 +25,7 @@ class Investment(models.Model):
         return u'%s' % (self.symbol)
 
     def current_price(self):
-        return self.historicalprice_set.latest('date').close
+        return self.snapshot_set.latest('date').close
 
     def price_at(self, target_date):
         '''latest close price <= target_date
