@@ -3,7 +3,7 @@ from . import models, presenters
 import decimal
 
 
-def investment_historical_prices(request, symbol):
+def investment_snapshots(request, symbol):
     investment = get_object_or_404(models.Investment, symbol=symbol)
 
     return render_to_response('pynvest_core/snapshots_table.html', {

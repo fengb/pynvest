@@ -10,6 +10,7 @@
         <th>High</th>
         <th>Low</th>
         <th>Close</th>
+        <th>Dividend</th>
       </tr>
     </thead>
     {% for price in prices %}
@@ -19,6 +20,11 @@
           <td>{{ price.high|floatformat:4 }}</td>
           <td>{{ price.low|floatformat:4 }}</td>
           <td>{{ price.close|floatformat:4 }}</td>
+          <td>
+            {% if price.dividend %}
+              {{ price.dividend|floatformat:4 }}
+            {% endif %}
+          </td>
         </tr>
       </tbody>
     {% endfor %}
