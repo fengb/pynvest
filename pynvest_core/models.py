@@ -27,12 +27,6 @@ class Investment(models.Model):
     def current_price(self):
         return self.snapshot_set.latest('date').close
 
-    def price_at(self, target_date):
-        '''latest close price <= target_date
-        Cannot do simple == target_date because weekends/holidays do not have prices
-        '''
-        return self.historicalprice_set.filter(date__lte=target_date).latest('date').close
-
 
 class Snapshot(models.Model):
     investment      = models.ForeignKey(Investment)
