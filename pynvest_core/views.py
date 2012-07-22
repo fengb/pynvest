@@ -8,7 +8,7 @@ def investment_snapshots(request, symbol):
 
     return render_to_response('pynvest_core/snapshots_table.html', {
         'title': investment.symbol,
-        'prices': investment.snapshot_set.order_by('-date'),
+        'snapshots': investment.snapshot_set.order_by('-date'),
     })
 
 

@@ -13,16 +13,16 @@
         <th>Dividend</th>
       </tr>
     </thead>
-    {% for price in prices %}
+    {% for snapshot in snapshots %}
       <tbody>
         <tr>
-          <th>{{ price.date }}</th>
-          <td>{{ price.high|floatformat:4 }}</td>
-          <td>{{ price.low|floatformat:4 }}</td>
-          <td>{{ price.close|floatformat:4 }}</td>
+          <th>{{ snapshot.date }}</th>
+          <td>{{ snapshot.high|floatformat:4 }}</td>
+          <td>{{ snapshot.low|floatformat:4 }}</td>
+          <td>{{ snapshot.close|floatformat:4 }}</td>
           <td>
-            {% if price.dividend %}
-              {{ price.dividend|floatformat:4 }}
+            {% if snapshot.dividend %}
+              {{ snapshot.dividend|floatformat:4 }}
             {% endif %}
           </td>
         </tr>
