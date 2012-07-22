@@ -13,7 +13,7 @@
     {% for date, value in growth.items %}
       <tbody>
         <tr>
-          <th>{{ date|date:'Y-m-d' }}</th>
+          <th>{{ date }}</th>
           <td>{{ value|floatformat:4 }}</td>
         </tr>
       </tbody>
