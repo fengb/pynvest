@@ -19,7 +19,7 @@
       <tbody>
         <tr class='summary'>
           <th>{{ lot_summary.investment }}</th>
-          <td>{{ lot_summary.purchase_date }}</td>
+          <td>{{ lot_summary.purchase_date|default:'' }}</td>
           <td>{{ lot_summary.purchase_price|floatformat:4 }}</td>
           <td>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
           <td>{{ lot_summary.current_price|floatformat:4 }}</td>
@@ -30,7 +30,7 @@
           {% for lot in lot_summary.lots %}
             <tr class='lot'>
               <th></th>
-              <td>{{ lot.purchase_date|date:'Y-m-d' }}</td>
+              <td>{{ lot.purchase_date|date }}</td>
               <td>{{ lot.purchase_price|floatformat:4 }}</td>
               <td>{{ lot.outstanding_shares|floatformat:4 }}</td>
               <td>{{ lot.current_price|floatformat:4 }}</td>
