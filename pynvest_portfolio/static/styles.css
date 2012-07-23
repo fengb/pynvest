@@ -2,7 +2,12 @@ table { border-collapse:collapse; }
 thead { border-bottom:1px solid #000; }
 tbody th { text-align: left; border-right:1px solid black; }
 th,
-td { padding:0 8px; text-align:right; }
+td { padding:0 0 0 16px; text-align:right; vertical-align:baseline; }
+th:first-child,
+td:first-child { padding:0 16px 0 8px; }
+th:last-child,
+td:last-child { padding-right:8px; }
 tr.lot { color:#bbb; }
+td.unrealized.gain.percent { font-size:12px; padding-left:0; }
 
 tbody { border-bottom:1px solid #888; }

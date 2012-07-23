@@ -6,38 +6,38 @@
   <table>
     <thead>
       <tr>
-        <th>Investment</th>
-        <th>Purchase Date</th>
-        <th>Purchase Price</th>
-        <th>Outstanding Shares</th>
-        <th>Current Price</th>
-        <th>Current Value</th>
-        <th colspan='2'>Unrealized Gain</th>
+        <th class='investment'>Investment</th>
+        <th class='purchase date'>Purchase Date</th>
+        <th class='purchase price'>Purchase Price</th>
+        <th class='outstanding shares'>Outstanding Shares</th>
+        <th class='current price'>Current Price</th>
+        <th class='current value'>Current Value</th>
+        <th colspan='2' class='unrealized gain'>Unrealized Gain</th>
       </tr>
     </thead>
     {% for lot_summary in lot_summarys %}
       <tbody>
         <tr class='summary'>
-          <th>{{ lot_summary.investment }}</th>
-          <td>{{ lot_summary.purchase_date|default:'' }}</td>
-          <td>{{ lot_summary.purchase_price|floatformat:4 }}</td>
-          <td>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
-          <td>{{ lot_summary.current_price|floatformat:4 }}</td>
-          <td>{{ lot_summary.current_value|floatformat:4 }}</td>
-          <td>{{ lot_summary.unrealized_gain|floatformat:4 }}</td>
-          <td>{{ lot_summary.unrealized_gain_percent|floatformat:2 }}%</td>
+          <th class='investment'>{{ lot_summary.investment }}</th>
+          <td class='purchase date'>{{ lot_summary.purchase_date|default:'' }}</td>
+          <td class='purchase price'>{{ lot_summary.purchase_price|floatformat:4 }}</td>
+          <td class='outstanding shares'>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
+          <td class='current price'>{{ lot_summary.current_price|floatformat:4 }}</td>
+          <td class='current value'>{{ lot_summary.current_value|floatformat:4 }}</td>
+          <td class='unrealized gain'>{{ lot_summary.unrealized_gain|floatformat:4 }}
+          <td class='unrealized gain percent'>{{ lot_summary.unrealized_gain_percent|floatformat:2 }}%</td>
         </tr>
         {% if lot_summary.lots|length > 1 %}
           {% for lot in lot_summary.lots %}
             <tr class='lot'>
-              <th></th>
-              <td>{{ lot.purchase_date|date }}</td>
-              <td>{{ lot.purchase_price|floatformat:4 }}</td>
-              <td>{{ lot.outstanding_shares|floatformat:4 }}</td>
-              <td>{{ lot.current_price|floatformat:4 }}</td>
-              <td>{{ lot.current_value|floatformat:4 }}</td>
-              <td>{{ lot.unrealized_gain|floatformat:4 }}</td>
-              <td>{{ lot.unrealized_gain_percent|floatformat:2 }}%</td>
+              <th class='investment'></th>
+              <td class='purchase date'>{{ lot.purchase_date|date }}</td>
+              <td class='purchase price'>{{ lot.purchase_price|floatformat:4 }}</td>
+              <td class='outstanding shares'>{{ lot.outstanding_shares|floatformat:4 }}</td>
+              <td class='current price'>{{ lot.current_price|floatformat:4 }}</td>
+              <td class='current value'>{{ lot.current_value|floatformat:4 }}</td>
+              <td class='unrealized gain'>{{ lot.unrealized_gain|floatformat:4 }}</td>
+              <td class='unrealized gain percent'>{{ lot.unrealized_gain_percent|floatformat:2 }}%</td>
             </tr>
           {% endfor %}
         {% endif %}
