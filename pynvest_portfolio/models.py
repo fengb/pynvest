@@ -26,6 +26,9 @@ class Lot(models.Model):
     def purchase_price(self):
         return self.base_transaction().price
 
+    def purchase_value(self):
+        return self.purchase_price() * self.outstanding_shares
+
     def current_price(self):
         return self.investment.current_price()
 
@@ -34,6 +37,9 @@ class Lot(models.Model):
 
     def unrealized_gain(self):
         return (self.current_price() - self.purchase_price()) * self.outstanding_shares
+
+    def unrealized_gain_percent(self):
+        return self.unrealized_gain() / self.purchase_value() * 100
 
     objects = managers.AnnotatedLotManager()
 
