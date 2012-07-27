@@ -7,9 +7,9 @@
     <thead>
       <tr>
         <th class='investment'>Investment</th>
+        <th class='outstanding shares'>Outstanding Shares</th>
         <th class='purchase date'>Purchase Date</th>
         <th class='purchase price'>Purchase Price</th>
-        <th class='outstanding shares'>Outstanding Shares</th>
         <th class='current price'>Current Price</th>
         <th class='current value'>Current Value</th>
         <th colspan='2' class='unrealized gain'>Unrealized Gain</th>
@@ -19,9 +19,9 @@
       <tbody>
         <tr class='summary'>
           <th class='investment'>{{ lot_summary.investment }}</th>
+          <td class='outstanding shares'>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
           <td class='purchase date'>{{ lot_summary.purchase_date|default:'' }}</td>
           <td class='purchase price'>{{ lot_summary.purchase_price|floatformat:4 }}</td>
-          <td class='outstanding shares'>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
           <td class='current price'>{{ lot_summary.current_price|floatformat:4 }}</td>
           <td class='current value'>{{ lot_summary.current_value|floatformat:4 }}</td>
           <td class='unrealized gain'>{{ lot_summary.unrealized_gain|floatformat:4 }}
@@ -31,9 +31,9 @@
           {% for lot in lot_summary.lots %}
             <tr class='lot'>
               <th class='investment'></th>
+              <td class='outstanding shares'>{{ lot.outstanding_shares|floatformat:4 }}</td>
               <td class='purchase date'>{{ lot.purchase_date|date }}</td>
               <td class='purchase price'>{{ lot.purchase_price|floatformat:4 }}</td>
-              <td class='outstanding shares'>{{ lot.outstanding_shares|floatformat:4 }}</td>
               <td class='current price'>{{ lot.current_price|floatformat:4 }}</td>
               <td class='current value'>{{ lot.current_value|floatformat:4 }}</td>
               <td class='unrealized gain'>{{ lot.unrealized_gain|floatformat:4 }}</td>
