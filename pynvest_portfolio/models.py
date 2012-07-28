@@ -1,6 +1,5 @@
 from django.db import models
 import pynvest_core
-from . import managers
 
 
 class Portfolio(models.Model):
@@ -41,7 +40,10 @@ class Lot(models.Model):
     def unrealized_gain_percent(self):
         return self.unrealized_gain() / self.purchase_value() * 100
 
-    objects = managers.AnnotatedLotManager()
+    objects = pynvest_core.managers.QuerySetManager()
+    class QuerySet(models.query.QuerySet):
+        def outstanding_shares(self):
+            return self.annotate(outstanding_shares=models.Sum('transaction__shares'))
 
 
 class Transaction(models.Model):
