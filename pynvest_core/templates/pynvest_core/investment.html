@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <dl>
+    <dt>Symbol</dt>
+    <dd>{{ investment.symbol }}</dd>
+
+    <dt>Name</dt>
+    <dd>{{ investment.name }}</dd>
+
+    <dt>Price</dt>
+    <dd>{{ investment.current_price|floatformat:2 }}</dd>
+
+    <dt>52 week range</dt>
+    <dd>{{ investment.year_low|floatformat:2 }} - {{ investment.year_high|floatformat:2 }}</dd>
+  </dl>
+{% endblock content %}

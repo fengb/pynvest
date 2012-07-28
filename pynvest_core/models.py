@@ -4,10 +4,6 @@ import datetime
 import urllib2
 
 
-def yesterday():
-    return datetime.date.today() - datetime.timedelta(1)
-
-
 class Exchange(models.Model):
     symbol          = models.CharField(max_length=10, unique=True)
     name            = models.CharField(max_length=200)
@@ -26,6 +22,20 @@ class Investment(models.Model):
 
     def current_price(self):
         return self.snapshot_set.latest('date').close
+
+    @property
+    def year_data(self):
+        if not hasattr(self, '_year_data'):
+            start_date = datetime.date.today() - datetime.timedelta(days=365)
+            self._year_data = self.snapshot_set.filter(date__gte=start_date).aggregate(high=models.Max('high'),
+                                                                                       low=models.Min('low'))
+        return self._year_data
+
+    def year_high(self):
+        return self.year_data['high']
+
+    def year_low(self):
+        return self.year_data['low']
 
 
 class Snapshot(models.Model):
