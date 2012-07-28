@@ -3,6 +3,8 @@ import pynvest_connect.yahoo
 import datetime
 import urllib2
 
+from . import managers
+
 
 class Exchange(models.Model):
     symbol          = models.CharField(max_length=10, unique=True)
@@ -23,19 +25,16 @@ class Investment(models.Model):
     def current_price(self):
         return self.snapshot_set.latest('date').close
 
-    @property
-    def year_data(self):
-        if not hasattr(self, '_year_data'):
-            start_date = datetime.date.today() - datetime.timedelta(days=365)
-            self._year_data = self.snapshot_set.filter(date__gte=start_date).aggregate(high=models.Max('high'),
-                                                                                       low=models.Min('low'))
-        return self._year_data
+    def _year_data(self, field):
+        if not hasattr(self, '_year_data_cache'):
+            self._year_data_cache = self.snapshot_set.filter_year_range().aggregate(high=models.Max('high'), low=models.Min('low'))
+        return self._year_data_cache[field]
 
     def year_high(self):
-        return self.year_data['high']
+        return self._year_data('high')
 
     def year_low(self):
-        return self.year_data['low']
+        return self._year_data('low')
 
 
 class Snapshot(models.Model):
@@ -46,11 +45,15 @@ class Snapshot(models.Model):
     close           = models.DecimalField(max_digits=12, decimal_places=4)
     dividend        = models.DecimalField(max_digits=12, decimal_places=4, default=0)
 
-    def __unicode__(self):
-        return u'%s %s %s' % (self.investment, self.date, self.close)
-
     class Meta:
         unique_together = [('investment', 'date')]
+
+    objects = managers.QuerySetManager()
+    class QuerySet(models.query.QuerySet):
+        def filter_year_range(self, end_date=None):
+            end_date = end_date or datetime.date.today()
+            start_date = end_date - datetime.timedelta(days=365)
+            return self.filter(date__lte=end_date, date__gte=start_date)
 
     @classmethod
     @transaction.commit_on_success
