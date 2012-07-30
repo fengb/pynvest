@@ -51,6 +51,19 @@ class Snapshot(models.Model):
     def dividend_percent(self):
         return self.dividend / self.close
 
+    def close_adjusted(self):
+        '''Adjusted based on dividends
+
+        Date        Close   Div   Adj
+        2011-10-15  99.00   1.00  99.00
+        2011-10-14  99.00   0.00  98.01
+        '''
+        adjust_snapshots = type(self).objects.filter(investment=self.investment, date__gt=self.date, dividend__gt=0
+                                            ).order_by('-date'
+                                            ).values_list('close', 'dividend')
+        percents = [close / (close + dividend) for (close, dividend) in adjust_snapshots] or [1]
+        return self.close * reduce(lambda x, y: x * y, percents)
+
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
         def filter_year_range(self, end_date=None):

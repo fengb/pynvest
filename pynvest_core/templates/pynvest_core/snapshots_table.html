@@ -11,6 +11,7 @@
         <th>Low</th>
         <th>Close</th>
         <th>Dividend</th>
+        <th>Adjusted Close</th>
       </tr>
     </thead>
     {% for snapshot in snapshots %}
@@ -25,6 +26,7 @@
               {{ snapshot.dividend|floatformat:4 }}
             {% endif %}
           </td>
+          <td>{{ snapshot.close_adjusted|floatformat:4 }}</td>
         </tr>
       </tbody>
     {% endfor %}
