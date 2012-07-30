@@ -22,7 +22,8 @@ class QuerySetManager(models.Manager):
     use_for_related_fields = True
 
     def get_query_set(self):
-        return self.model.QuerySet(self.model)
+        func = getattr(self.model.QuerySet, 'from_manager', self.model.QuerySet)
+        return func(self.model)
 
     def __getattr__(self, name):
         return getattr(self.get_query_set(), name)
