@@ -56,14 +56,12 @@ class PrincipalGrowth(object):
         return self._cashflows
 
 
-class InvestmentGrowth(object):
-    def __init__(self, investment, entries, name=None, price_finder=None):
+class FlatGrowth(object):
+    def __init__(self, entries, price_finder, name=None):
         '''entries - [(date, shares, value), ...]'''
-        self.name = name or investment.symbol
-        self.investment = investment
+        self.name = name
+        self.price_finder = price_finder
 
-        start_date = min(entry[0] for entry in entries)
-        self.price_finder = price_finder or PriceFinder(self.investment, start_date)
         self._cashflows = sorted([(date, value) for (date, shares, value) in entries], key=operator.itemgetter(0))
 
         shares_items = []
@@ -72,17 +70,6 @@ class InvestmentGrowth(object):
             sum += shares
             shares_items.append((date, sum))
         self.shares_finder = utils.BinarySearchThing(shares_items, default=decimal.Decimal(0))
-
-    @classmethod
-    def lump_sum(cls, investment, start_date, start_value):
-        return cls.lump_sums(investment, [(start_date, start_value)])
-
-    @classmethod
-    def lump_sums(cls, investment, entries):
-        '''entries is a list of [(date, value), ...]'''
-        price_finder = PriceFinder(investment, min(entry[0] for entry in entries))
-        growth_entries = [(date, value / price_finder[date], value) for (date, value) in entries]
-        return cls(investment, growth_entries, price_finder=price_finder)
 
     def __iter__(self):
         return iter(self.price_finder)
@@ -95,6 +82,11 @@ class InvestmentGrowth(object):
 
     def cashflows(self):
         return self._cashflows
+
+
+def InvestmentGrowth(investment, entries):
+    price_finder = PriceFinder(investment, min(entry[0] for entry in entries))
+    return FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
 
 
 class AggregateGrowth(object):
@@ -124,7 +116,9 @@ class AggregateGrowth(object):
         return sorted(all_cashflows.items())
 
     def benchmark(self, investment):
-        return InvestmentGrowth.lump_sums(investment, self.cashflows())
+        price_finder = PriceFinder(investment, next(iter(self)))
+        entries = [(date, value / price_finder[date], value) for (date, value) in self.cashflows()]
+        return FlatGrowth(entries, price_finder, name=investment.symbol)
 
     def principal(self):
         return PrincipalGrowth(self.cashflows())
