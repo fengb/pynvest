@@ -95,7 +95,7 @@ class AggregateGrowth(object):
         return [(date, self[date]) for date in self]
 
     def cashflows(self):
-        all_cashflows = collections.defaultdict(0)
+        all_cashflows = collections.defaultdict(int)
         for growth in self.subgrowths:
             for (date, value) in growth.cashflows():
                 all_cashflows[date] += value
