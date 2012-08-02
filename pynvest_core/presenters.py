@@ -1,4 +1,5 @@
 '''Growth interface is any object that supports dict-like read-only interface:
+    name               -> name of the growth
     iter(g)            -> [date, ...] (ascending)
     g[spam]            -> number
     g.items()          -> [(date, number), ...] (ascending by date)
@@ -26,7 +27,7 @@ def PriceFinder(investment, start_date=None):
     if start_date and items[0][0] != start_date:
         # hard cutoff at start_date
         items[0] = (start_date, items[0][1])
-    return utils.BinarySearchThing(items)
+    return utils.BinarySearchThing(items, default=decimal.Decimal(0))
 
 
 class PrincipalGrowth(object):
@@ -40,7 +41,7 @@ class PrincipalGrowth(object):
         for (date, value) in cashflows:
             sum_value += value
             values.append((date, sum_value))
-        self.value_finder = utils.BinarySearchThing(values)
+        self.value_finder = utils.BinarySearchThing(values, default=decimal.Decimal(0))
 
     def __iter__(self):
         return iter(self.value_finder)
@@ -60,8 +61,9 @@ class InvestmentGrowth(object):
         '''entries - [(date, shares, value), ...]'''
         self.name = name or investment.symbol
         self.investment = investment
-        self.start_date = min(entry[0] for entry in entries)
-        self.price_finder = price_finder or PriceFinder(self.investment, self.start_date)
+
+        start_date = min(entry[0] for entry in entries)
+        self.price_finder = price_finder or PriceFinder(self.investment, start_date)
         self._cashflows = sorted([(date, value) for (date, shares, value) in entries], key=operator.itemgetter(0))
 
         shares_items = []
@@ -69,7 +71,7 @@ class InvestmentGrowth(object):
         for (date, shares, value) in sorted(entries):
             sum += shares
             shares_items.append((date, sum))
-        self.shares_finder = utils.BinarySearchThing(shares_items)
+        self.shares_finder = utils.BinarySearchThing(shares_items, default=decimal.Decimal(0))
 
     @classmethod
     def lump_sum(cls, investment, start_date, start_value):
@@ -86,9 +88,6 @@ class InvestmentGrowth(object):
         return iter(self.price_finder)
 
     def __getitem__(self, date):
-        if date < self.start_date:
-            return 0
-
         return self.shares_finder[date] * self.price_finder[date]
 
     def items(self):
