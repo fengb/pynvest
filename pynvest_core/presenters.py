@@ -63,6 +63,18 @@ def InvestmentGrowth(investment, entries):
     return FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
 
 
+def BenchmarkGrowth(growth, investment):
+    price_finder = PriceFinder(investment, next(iter(growth)))
+    entries = [(date, value / price_finder[date], value) for (date, value) in growth.cashflows()]
+    return FlatGrowth(entries, price_finder, name=investment.symbol)
+
+
+def PrincipalGrowth(growth):
+    price_finder = utils.BinarySearchThing([], default=decimal.Decimal(1))
+    return FlatGrowth([(date, cashflow, cashflow) for (date, cashflow) in growth.cashflows()],
+                      price_finder=price_finder, name=u'Principal')
+
+
 class AggregateGrowth(object):
     def __init__(self, growths, name=None):
         self.name = name
@@ -89,12 +101,3 @@ class AggregateGrowth(object):
 
         return sorted(all_cashflows.items())
 
-    def benchmark(self, investment):
-        price_finder = PriceFinder(investment, next(iter(self)))
-        entries = [(date, value / price_finder[date], value) for (date, value) in self.cashflows()]
-        return FlatGrowth(entries, price_finder, name=investment.symbol)
-
-    def principal(self):
-        price_finder = utils.BinarySearchThing([], default=decimal.Decimal(1))
-        return FlatGrowth([(date, cashflow, cashflow) for (date, cashflow) in self.cashflows()],
-                          price_finder=price_finder, name=u'Principal')
