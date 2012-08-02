@@ -30,8 +30,9 @@ def PriceFinder(investment, start_date=None):
 
 
 class InvestmentGrowth(object):
-    def __init__(self, investment, entries, price_finder=None):
+    def __init__(self, investment, entries, name=None, price_finder=None):
         '''entries - [(date, shares, value), ...]'''
+        self.name = name or investment.symbol
         self.investment = investment
         self.start_date = min(entry[0] for entry in entries)
         self.price_finder = price_finder or PriceFinder(self.investment, self.start_date)
@@ -76,7 +77,8 @@ class InvestmentGrowth(object):
 
 
 class AggregateGrowth(object):
-    def __init__(self, growths):
+    def __init__(self, growths, name=None):
+        self.name = name
         self.subgrowths = list(growths)
 
     def iter_order_unique(self, *growths):

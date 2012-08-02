@@ -64,4 +64,5 @@ def PortfolioInvestmentGrowth(portfolio, investment):
 
 def PortfolioGrowth(portfolio):
     investments = set(lot.investment for lot in portfolio.lot_set.all())
-    return pynvest_core.presenters.AggregateGrowth(PortfolioInvestmentGrowth(portfolio, investment) for investment in investments)
+    return pynvest_core.presenters.AggregateGrowth((PortfolioInvestmentGrowth(portfolio, investment) for investment in investments),
+                                                   name=portfolio.name)
