@@ -13,9 +13,9 @@ def portfolio_summary(request, id):
 
 def portfolio_growth(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    return render_to_response('pynvest_core/growth_table.html', {
+    return render_to_response('pynvest_core/growths_table.html', {
         'title': portfolio.name,
-        'growth': presenters.PortfolioGrowth(portfolio),
+        'growths': [presenters.PortfolioGrowth(portfolio)],
     })
 
 
