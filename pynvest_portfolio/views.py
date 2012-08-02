@@ -17,8 +17,9 @@ def portfolio_growth(request, id, compare=None):
 
     growths = [presenters.PortfolioGrowth(portfolio)]
     if compare:
-        investment = get_object_or_404(pynvest_core.models.Investment, symbol=compare)
-        growths.append(growths[0].benchmark(investment))
+        for symbol in compare.split('+'):
+            investment = get_object_or_404(pynvest_core.models.Investment, symbol=symbol)
+            growths.append(growths[0].benchmark(investment))
 
     return render_to_response('pynvest_core/growths_table.html', {
         'title': portfolio.name,
