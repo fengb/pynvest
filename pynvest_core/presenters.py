@@ -29,6 +29,32 @@ def PriceFinder(investment, start_date=None):
     return utils.BinarySearchThing(items)
 
 
+class PrincipalGrowth(object):
+    def __init__(self, cashflows, name='Principal'):
+        '''cashflows - [(date, value), ...]'''
+        self.name = name
+        self._cashflows = cashflows
+
+        sum_value = 0
+        values = []
+        for (date, value) in cashflows:
+            sum_value += value
+            values.append((date, sum_value))
+        self.value_finder = utils.BinarySearchThing(values)
+
+    def __iter__(self):
+        return iter(self.value_finder)
+
+    def __getitem__(self, date):
+        return self.value_finder[date]
+
+    def items(self):
+        return [(date, self[date]) for date in self]
+
+    def cashflows(self):
+        return self._cashflows
+
+
 class InvestmentGrowth(object):
     def __init__(self, investment, entries, name=None, price_finder=None):
         '''entries - [(date, shares, value), ...]'''
@@ -100,3 +126,6 @@ class AggregateGrowth(object):
 
     def benchmark(self, investment):
         return InvestmentGrowth.lump_sums(investment, self.cashflows())
+
+    def principal(self):
+        return PrincipalGrowth(self.cashflows())

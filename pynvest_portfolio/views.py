@@ -16,6 +16,7 @@ def portfolio_growth(request, id, compare=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
 
     growths = [presenters.PortfolioGrowth(portfolio)]
+    growths.append(growths[0].principal())
     if compare:
         for symbol in compare.split('+'):
             investment = get_object_or_404(pynvest_core.models.Investment, symbol=symbol)
