@@ -56,10 +56,6 @@ class InvestmentGrowth(object):
         growth_entries = [(date, value / price_finder[date], value) for (date, value) in entries]
         return cls(investment, growth_entries, price_finder=price_finder)
 
-    @classmethod
-    def benchmark(cls, investment, growth):
-        return cls.lump_sums(investment, growth.cashflows())
-
     def __iter__(self):
         return iter(self.price_finder)
 
@@ -101,3 +97,6 @@ class AggregateGrowth(object):
                 all_cashflows[date] += value
 
         return sorted(all_cashflows.items())
+
+    def benchmark(self, investment):
+        return InvestmentGrowth.lump_sums(investment, self.cashflows())
