@@ -1,11 +1,13 @@
-from . import models, util
+from . import models
 import django.db
 import pynvest_core.presenters
 import operator
+import itertools
 
 
 class LotSummary(object):
     def __init__(self, lots):
+        lots = list(lots)
         if len(lots) < 1:
             raise ValueError
 
@@ -53,7 +55,9 @@ class LotSummary(object):
 
     @classmethod
     def group_by_investment(cls, lots):
-        return [cls(ls) for (investment, ls) in util.groupbyrollup(lots, key=operator.attrgetter('investment'))]
+        keyfunc = lambda x: x.investment.symbol
+        lots = sorted(lots, key=keyfunc)
+        return [cls(ls) for (investment, ls) in itertools.groupby(lots, key=keyfunc)]
 
 
 def PortfolioInvestmentGrowth(portfolio, investment):

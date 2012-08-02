@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response, get_object_or_404
-from . import models, presenters, util
+from . import models, presenters
 import pynvest_core
 
 
