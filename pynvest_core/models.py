@@ -48,6 +48,9 @@ class Snapshot(models.Model):
     class Meta:
         unique_together = [('investment', 'date')]
 
+    def dividend_percent(self):
+        return self.dividend / self.close
+
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
         def filter_year_range(self, end_date=None):
