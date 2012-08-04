@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load percent %}
 
 {% block title %}{{ title }}{% endblock title %}
 
@@ -25,7 +26,7 @@
           <td class='current price'>{{ lot_summary.current_price|floatformat:4 }}</td>
           <td class='current value'>{{ lot_summary.current_value|floatformat:4 }}</td>
           <td class='unrealized gain'>{{ lot_summary.unrealized_gain|floatformat:4 }}
-          <td class='unrealized gain percent'>{{ lot_summary.unrealized_gain_percent|floatformat:2 }}%</td>
+          <td class='unrealized gain percent'>{{ lot_summary.unrealized_gain_percent|percent }}</td>
         </tr>
         {% if lot_summary.lots|length > 1 %}
           {% for lot in lot_summary.lots %}
@@ -37,7 +38,7 @@
               <td class='current price'>{{ lot.current_price|floatformat:4 }}</td>
               <td class='current value'>{{ lot.current_value|floatformat:4 }}</td>
               <td class='unrealized gain'>{{ lot.unrealized_gain|floatformat:4 }}</td>
-              <td class='unrealized gain percent'>{{ lot.unrealized_gain_percent|floatformat:2 }}%</td>
+              <td class='unrealized gain percent'>{{ lot.unrealized_gain_percent|percent }}</td>
             </tr>
           {% endfor %}
         {% endif %}

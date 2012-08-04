@@ -51,7 +51,7 @@ class LotSummary(object):
         return self._sum_field('unrealized_gain')
 
     def unrealized_gain_percent(self):
-        return self.unrealized_gain() / self._sum_field('purchase_value') * 100
+        return self.unrealized_gain() / self._sum_field('purchase_value')
 
     @classmethod
     def group_by_investment(cls, lots):
