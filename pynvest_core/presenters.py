@@ -67,24 +67,21 @@ def BenchmarkGrowth(growth, investment):
     start_date = next(iter(growth))
     price_finder = PriceFinder(investment, start_date)
 
-    dividends = models.Snapshot.objects.filter(investment=investment, dividend__gt=0
+    dividends = models.Snapshot.objects.filter(investment=investment, dividend__gt=0, date__gt=start_date
                                       ).order_by('date')
     dividends = collections.deque(dividends)
     cashflows = collections.deque(growth.cashflows())
     sum_shares = 0
     entries = []
-    while dividends or cashflows:
-        if not dividends:
+    while cashflows or dividends:
+        if cashflows and (not dividends or cashflows[0][0] <= dividends[0].date):
             (date, value) = cashflows.popleft()
             shares = value / price_finder[date]
-        elif not cashflows or dividends[0].date < cashflows[0][0]:
+        else: # if dividends and (not cashflows or dividends[0].date < cashflows[0][0]):
             dividend = dividends.popleft()
             date = dividend.date
             shares = sum_shares * dividend.dividend_percent()
             value = 0 # reinvested dividends are not from outside thus are not cash values
-        else: #cashflows[0][0] <= dividends[0].date:
-            (date, value) = cashflows.popleft()
-            shares = value / price_finder[date]
 
         sum_shares += shares
         entries.append((date, shares, value))
