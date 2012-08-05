@@ -70,7 +70,7 @@ class Snapshot(models.Model):
 
             try:
                 populated_dates = set(investment.snapshot_set.values_list('date', flat=True))
-                prices = pynvest_connect.yahoo.historical_prices(investment.symbol)
+                prices = pynvest_connect.historical_prices(investment.symbol)
                 for row in prices:
                     if row.date in populated_dates:
                         break
