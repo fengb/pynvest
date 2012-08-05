@@ -38,7 +38,7 @@ class Lot(models.Model):
         return (self.current_price() - self.purchase_price()) * self.outstanding_shares
 
     def unrealized_gain_percent(self):
-        return self.unrealized_gain() / self.purchase_value() * 100
+        return self.unrealized_gain() / self.purchase_value()
 
     objects = pynvest_core.managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
