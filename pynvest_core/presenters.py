@@ -58,11 +58,6 @@ class FlatGrowth(object):
         return self._cashflows
 
 
-def InvestmentGrowth(investment, entries):
-    price_finder = PriceFinder(investment, min(entry[0] for entry in entries))
-    return FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
-
-
 def BenchmarkGrowth(growth, investment):
     start_date = next(iter(growth))
     price_finder = PriceFinder(investment, start_date)

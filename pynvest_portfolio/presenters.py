@@ -63,7 +63,8 @@ class LotSummary(object):
 def PortfolioInvestmentGrowth(portfolio, investment):
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
     entries = [(transaction.date, transaction.shares, transaction.value()) for transaction in transactions]
-    return pynvest_core.presenters.InvestmentGrowth(investment, entries)
+    price_finder = pynvest_core.presenters.PriceFinder(investment, min(entry[0] for entry in entries))
+    return pynvest_core.presenters.FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
 
 
 def PortfolioGrowth(portfolio):
