@@ -60,28 +60,37 @@ class Snapshot(models.Model):
 
     @classmethod
     @transaction.commit_on_success
-    def batch_populate(cls, *investments):
-        if not investments:
-            investments = Investment.objects.all()
+    def batch_populate(cls, fix_existing=False):
+        investments = Investment.objects.all()
 
         for investment in investments:
             if isinstance(investment, basestring):
                 investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
 
             try:
-                populated_dates = set(investment.snapshot_set.values_list('date', flat=True))
+                existing_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
                 prices = pynvest_connect.historical_prices(investment.symbol)
                 for row in prices:
-                    if row.date in populated_dates:
-                        break
-
-                    snapshot = Snapshot.objects.create(
-                        investment=investment,
-                        date=row.date,
-                        high=row.high,
-                        low=row.low,
-                        close=row.close,
-                    )
+                    if row.date in existing_snapshots:
+                        snapshot = existing_snapshots[row.date]
+                        if (snapshot.high  != row.high or
+                            snapshot.low   != row.low or
+                            snapshot.close != row.close):
+                            snapshot.high = row.high
+                            snapshot.low = row.low
+                            snapshot.close = row.close
+                            snapshot.save()
+                        elif not fix_existing:
+                            # Assume the rest are duplicate entries
+                            break
+                    else:
+                        snapshot = Snapshot.objects.create(
+                            investment=investment,
+                            date=row.date,
+                            high=row.high,
+                            low=row.low,
+                            close=row.close,
+                        )
 
                 dividends = pynvest_connect.yahoo.dividends(investment.symbol)
                 for dividend in dividends:
