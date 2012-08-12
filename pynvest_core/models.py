@@ -1,9 +1,27 @@
 from django.db import models, transaction
+import django
 import pynvest_connect.yahoo
 import datetime
 import urllib2
 
 from . import managers
+
+@django.dispatch.receiver(django.db.backends.signals.connection_created)
+def add_sqlite_math_functions(connection, **kwargs):
+    if connection.vendor != 'sqlite':
+        return
+
+    class Product:
+        def __init__(self):
+            self.product = 1
+
+        def step(self, value):
+            self.product *= value
+
+        def finalize(self):
+            return self.product
+
+    connection.connection.create_aggregate('product', 1, Product)
 
 
 class Exchange(models.Model):
@@ -51,19 +69,6 @@ class Snapshot(models.Model):
     def dividend_percent(self):
         return self.dividend / self.close
 
-    def close_adjusted(self):
-        '''Adjusted based on dividends
-
-        Date        Close   Div   Adj
-        2011-10-15  99.00   1.00  99.00
-        2011-10-14  99.00   0.00  98.01
-        '''
-        adjust_snapshots = type(self).objects.filter(investment=self.investment, date__gt=self.date, dividend__gt=0
-                                            ).order_by('-date'
-                                            ).values_list('close', 'dividend')
-        percents = [close / (close + dividend) for (close, dividend) in adjust_snapshots] or [1]
-        return self.close * reduce(lambda x, y: x * y, percents)
-
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
         def filter_year_range(self, end_date=None):
@@ -72,13 +77,13 @@ class Snapshot(models.Model):
             return self.filter(date__lte=end_date, date__gte=start_date)
 
         def close_adjusted(self):
-            # FIXME: actually have correct close_adjusted calculation
-            subquery = '''SELECT SUM(dividend)
+            func = 'PRODUCT(close / (close + dividend))'
+            subquery = '''SELECT %(table)s.close * COALESCE(%(func)s, 1)
                             FROM %(table)s t
                            WHERE investment_id = %(table)s.investment_id
                              AND dividend > 0
                              AND date > %(table)s.date
-                       ''' % {'table': self.model._meta.db_table}
+                       ''' % {'table': self.model._meta.db_table, 'func': func}
             return self.extra(select={'close_adjusted': subquery})
 
     @classmethod
