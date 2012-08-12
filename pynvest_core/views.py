@@ -19,5 +19,7 @@ def investment_snapshots(request, symbol, year=None, month=None, day=None):
 
     return render_to_response('pynvest_core/snapshots_table.html', {
         'title': investment.symbol,
-        'snapshots': investment.snapshot_set.filter_year_range(end_date=end_date).order_by('-date'),
+        'snapshots': investment.snapshot_set.filter_year_range(end_date=end_date
+                                           ).close_adjusted(
+                                           ).order_by('-date'),
     })

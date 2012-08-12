@@ -1,9 +1,27 @@
 from django.db import models, transaction
+import django
 import pynvest_connect
 import datetime
 import urllib2
 
 from . import managers
+
+@django.dispatch.receiver(django.db.backends.signals.connection_created)
+def add_sqlite_math_functions(connection, **kwargs):
+    if connection.vendor != 'sqlite':
+        return
+
+    class Product:
+        def __init__(self):
+            self.product = 1
+
+        def step(self, value):
+            self.product *= value
+
+        def finalize(self):
+            return self.product
+
+    connection.connection.create_aggregate('product', 1, Product)
 
 
 class Exchange(models.Model):
@@ -39,7 +57,7 @@ class Investment(models.Model):
 
 class Snapshot(models.Model):
     investment      = models.ForeignKey(Investment)
-    date            = models.DateField()
+    date            = models.DateField(db_index=True)
     high            = models.DecimalField(max_digits=12, decimal_places=4)
     low             = models.DecimalField(max_digits=12, decimal_places=4)
     close           = models.DecimalField(max_digits=12, decimal_places=4)
@@ -57,6 +75,16 @@ class Snapshot(models.Model):
             end_date = end_date or datetime.date.today()
             start_date = end_date - datetime.timedelta(days=365)
             return self.filter(date__lte=end_date, date__gte=start_date)
+
+        def close_adjusted(self):
+            func = 'PRODUCT(close / (close + dividend))'
+            subquery = '''SELECT %(table)s.close * COALESCE(%(func)s, 1)
+                            FROM %(table)s t
+                           WHERE investment_id = %(table)s.investment_id
+                             AND dividend > 0
+                             AND date > %(table)s.date
+                       ''' % {'table': self.model._meta.db_table, 'func': func}
+            return self.extra(select={'close_adjusted': subquery})
 
     @classmethod
     @transaction.commit_on_success

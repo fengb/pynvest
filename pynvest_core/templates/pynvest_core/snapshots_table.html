@@ -10,6 +10,7 @@
         <th>High</th>
         <th>Low</th>
         <th>Close</th>
+        <th>Adjusted Close</th>
         <th>Dividend</th>
       </tr>
     </thead>
@@ -20,6 +21,7 @@
           <td>{{ snapshot.high|floatformat:4 }}</td>
           <td>{{ snapshot.low|floatformat:4 }}</td>
           <td>{{ snapshot.close|floatformat:4 }}</td>
+          <td>{{ snapshot.close_adjusted|floatformat:4 }}</td>
           <td>
             {% if snapshot.dividend %}
               {{ snapshot.dividend|floatformat:4 }}
