@@ -1,5 +1,5 @@
 from django.db import models, transaction
-import pynvest_connect.yahoo
+import pynvest_connect
 import datetime
 import urllib2
 
@@ -92,7 +92,7 @@ class Snapshot(models.Model):
                             close=row.close,
                         )
 
-                dividends = pynvest_connect.yahoo.dividends(investment.symbol)
+                dividends = pynvest_connect.dividends(investment.symbol)
                 for dividend in dividends:
                     snapshot = investment.snapshot_set.get(date=dividend.date)
                     if snapshot.dividend:

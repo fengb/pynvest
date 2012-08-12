@@ -7,16 +7,21 @@ _MODULES = {
   'yahoo': yahoo,
   'google': google,
   'morningstar': morningstar,
-  '_default': yahoo,  # FIXME: replace with a better public API
+  '_default': yahoo,  # FIXME: replace Yahoo with a better public API
 }
+
+def module(kwargs):
+    api = kwargs.pop('api', '_default')
+
+    try:
+        return _MODULES[api]
+    except KeyError:
+        raise ApiNotFound(api)
 
 
 def historical_prices(*args, **kwargs):
-    api = kwargs.get('api', '_default')
+    return module(kwargs).historical_prices(*args, **kwargs)
 
-    try:
-        module = _MODULES[api]
-    except KeyError:
-        raise ApiNotFound(api)
-    else:
-        return module.historical_prices(*args)
+
+def dividends(*args, **kwargs):
+    return module(kwargs).dividends(*args, **kwargs)
