@@ -1,6 +1,6 @@
 from . import models
 import django.db
-import pynvest_core.presenters
+import pynvest_investment.presenters
 import operator
 import itertools
 
@@ -63,11 +63,11 @@ class LotSummary(object):
 def PortfolioInvestmentGrowth(portfolio, investment):
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
     entries = [(transaction.date, transaction.shares, transaction.value()) for transaction in transactions]
-    price_finder = pynvest_core.presenters.PriceFinder(investment, min(entry[0] for entry in entries))
-    return pynvest_core.presenters.FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
+    price_finder = pynvest_investment.presenters.PriceFinder(investment, min(entry[0] for entry in entries))
+    return pynvest_investment.presenters.FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
 
 
 def PortfolioGrowth(portfolio):
     investments = set(lot.investment for lot in portfolio.lot_set.all())
-    return pynvest_core.presenters.AggregateGrowth((PortfolioInvestmentGrowth(portfolio, investment) for investment in investments),
+    return pynvest_investment.presenters.AggregateGrowth((PortfolioInvestmentGrowth(portfolio, investment) for investment in investments),
                                                    name=portfolio.name)

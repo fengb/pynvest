@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from . import models, presenters
-import pynvest_core
+import pynvest_investment
 
 
 def portfolio_summary(request, id):
@@ -18,12 +18,12 @@ def portfolio_growth(request, id, compare=None):
     growths = [presenters.PortfolioGrowth(portfolio)]
     if compare:
         for symbol in compare.split('+'):
-            investment = get_object_or_404(pynvest_core.models.Investment, symbol=symbol)
-            growths.append(pynvest_core.presenters.BenchmarkGrowth(growths[0], investment))
+            investment = get_object_or_404(pynvest_investment.models.Investment, symbol=symbol)
+            growths.append(pynvest_investment.presenters.BenchmarkGrowth(growths[0], investment))
     else:
-        growths.append(pynvest_core.presenters.PrincipalGrowth(growths[0]))
+        growths.append(pynvest_investment.presenters.PrincipalGrowth(growths[0]))
 
-    return render_to_response('pynvest_core/growths_table.html', {
+    return render_to_response('pynvest_investment/growths_table.html', {
         'title': portfolio.name,
         'growths': growths,
     })

@@ -1,5 +1,5 @@
 from django.db import models
-import pynvest_core
+import pynvest_investment
 
 
 class Portfolio(models.Model):
@@ -10,7 +10,7 @@ class Portfolio(models.Model):
 
 
 class Lot(models.Model):
-    investment      = models.ForeignKey(pynvest_core.models.Investment)
+    investment      = models.ForeignKey(pynvest_investment.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
 
     def __unicode__(self):
@@ -40,7 +40,7 @@ class Lot(models.Model):
     def unrealized_gain_percent(self):
         return self.unrealized_gain() / self.purchase_value()
 
-    objects = pynvest_core.managers.QuerySetManager()
+    objects = pynvest_investment.managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
         @classmethod
         def from_manager(cls, *args, **kwargs):
