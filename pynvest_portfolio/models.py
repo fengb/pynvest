@@ -9,10 +9,10 @@ class Portfolio(models.Model):
         return u'%s' % self.name
 
 
-class Dividend(models.Model):
+class Adjustment(models.Model):
     investment      = models.ForeignKey(pynvest_investment.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
-    date            = models.DateField()
+    date            = models.DateField(db_index=True)
     value           = models.DecimalField(max_digits=12, decimal_places=4)
 
     def __unicode__(self):
