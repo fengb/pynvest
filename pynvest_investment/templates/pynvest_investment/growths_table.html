@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load lookup %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        {% for growth in growths %}
+          <th>{{ growth.name }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    {% for date in growths.0 %}
+      <tbody>
+        <tr>
+          <th>{{ date }}</th>
+          {% for growth in growths %}
+            <td>{{ growth|lookup:date|floatformat:4 }}</td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    {% endfor %}
+  </table>
+{% endblock content %}

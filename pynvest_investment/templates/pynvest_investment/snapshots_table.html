@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>High</th>
+        <th>Low</th>
+        <th>Close</th>
+        <th>Adjusted Close</th>
+        <th>Dividend</th>
+      </tr>
+    </thead>
+    {% for snapshot in snapshots %}
+      <tbody>
+        <tr>
+          <th>{{ snapshot.date }}</th>
+          <td>{{ snapshot.high|floatformat:4 }}</td>
+          <td>{{ snapshot.low|floatformat:4 }}</td>
+          <td>{{ snapshot.close|floatformat:4 }}</td>
+          <td>{{ snapshot.close_adjusted|floatformat:4 }}</td>
+          <td>
+            {% if snapshot.dividend %}
+              {{ snapshot.dividend|floatformat:4 }}
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    {% endfor %}
+  </table>
+{% endblock content %}

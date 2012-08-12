@@ -1,6 +1,5 @@
 from django.db import models
-import pynvest_core
-from . import managers
+import pynvest_investment
 
 
 class Portfolio(models.Model):
@@ -11,7 +10,7 @@ class Portfolio(models.Model):
 
 
 class Dividend(models.Model):
-    investment      = models.ForeignKey(pynvest_core.models.Investment)
+    investment      = models.ForeignKey(pynvest_investment.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
     date            = models.DateField()
     value           = models.DecimalField(max_digits=12, decimal_places=4)
@@ -21,7 +20,7 @@ class Dividend(models.Model):
 
 
 class Lot(models.Model):
-    investment      = models.ForeignKey(pynvest_core.models.Investment)
+    investment      = models.ForeignKey(pynvest_investment.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
 
     def __unicode__(self):
@@ -30,7 +29,32 @@ class Lot(models.Model):
     def base_transaction(self):
         return self.transaction_set.order_by('date')[0]
 
-    objects = managers.AnnotatedLotManager()
+    def purchase_date(self):
+        return self.base_transaction().date
+
+    def purchase_price(self):
+        return self.base_transaction().price
+
+    def purchase_value(self):
+        return self.purchase_price() * self.outstanding_shares
+
+    def current_price(self):
+        return self.investment.current_price()
+
+    def current_value(self):
+        return self.current_price() * self.outstanding_shares
+
+    def unrealized_gain(self):
+        return (self.current_price() - self.purchase_price()) * self.outstanding_shares
+
+    def unrealized_gain_percent(self):
+        return self.unrealized_gain() / self.purchase_value()
+
+    objects = pynvest_investment.managers.QuerySetManager()
+    class QuerySet(models.query.QuerySet):
+        @classmethod
+        def from_manager(cls, *args, **kwargs):
+            return cls(*args, **kwargs).annotate(outstanding_shares=models.Sum('transaction__shares'))
 
 
 class Transaction(models.Model):

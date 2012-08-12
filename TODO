@@ -1,12 +1,6 @@
-Tax functionality:
+Organization:
 - Add transaction by lot or new lot.
 - Filter by date.
-- Realized gains.
-
-
-Organization:
-- Current price.
-- Unrealized gains.
 - Filter by active transactions.
 - Categorization.
 - Rebalancing.
