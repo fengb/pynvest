@@ -29,10 +29,12 @@ def portfolio_growth(request, id, compare=None):
     })
 
 
-def portfolio_sales(request, id, year):
+def portfolio_sales(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, date__year=year)\
-                                             .order_by('date', 'lot__investment')
+    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio
+                                            ).order_by('date', 'lot__investment')
+    if year:
+        transactions = transactions.filter(date__year=year)
 
     return render_to_response('pynvest_portfolio/transaction_sales_table.html', {
         'title': portfolio.name,
