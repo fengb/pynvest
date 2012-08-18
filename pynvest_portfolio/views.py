@@ -44,10 +44,14 @@ def portfolio_sales(request, id, year=None):
 
 def portfolio_transactions(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio
-                                            ).order_by('date', 'lot__investment')
-    if year:
-        transactions = transactions.filter(date__year=year)
+    transactions = models.Transaction.objects.raw('''SELECT MIN(t.id) as id, MIN(lot_id) as lot_id, date, price, SUM(shares) as shares
+                                                       FROM pynvest_portfolio_transaction t
+                                                       JOIN pynvest_portfolio_lot l
+                                                         ON l.id = lot_id
+                                                      WHERE portfolio_id = %s
+                                                      GROUP BY date, price
+                                                      ORDER BY date, investment_id
+                                                  ''', [portfolio.id])
 
     return render_to_response('pynvest_portfolio/transactions.html', {
         'portfolio': portfolio,
