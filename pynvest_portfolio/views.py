@@ -40,7 +40,7 @@ def portfolio_sales(request, id, year):
     })
 
 
-def portfolio_flat(request, id):
+def portfolio_transactions(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     return render_to_response('pynvest_portfolio/transactions.html', {
         'portfolio': portfolio,
