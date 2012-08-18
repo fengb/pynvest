@@ -8,4 +8,5 @@ urlpatterns = patterns('',
     url(r'^(?P<id>\d+)/sales/$', views.portfolio_sales),
     url(r'^(?P<id>\d+)/sales/(?P<year>\d+)/$', views.portfolio_sales),
     url(r'^(?P<id>\d+)/transactions/$', views.portfolio_transactions),
+    url(r'^(?P<id>\d+)/transactions/(?P<year>\d+)/$', views.portfolio_transactions),
 )
