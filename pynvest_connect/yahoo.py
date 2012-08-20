@@ -55,6 +55,27 @@ def dividends(symbol, start_date=None, end_date=None):
         response.close()
 
 
+_SPLITS_TUPLE = collections.namedtuple('Split', 'date before after')
+def splits(symbol, start_date=None, end_date=None):
+    # What the hell is 'x'?  I really hate Yahoo API...
+    response = _ichart_request(symbol, start_date, end_date, extra_params=['g=v'], resource='x')
+    try:
+        raw = csv.reader(response)
+
+        next(raw) # remove directives row. Useless AND wrong this time!
+        splits = []
+        for row in raw:
+            if row[0].lower() != 'split':
+                continue
+            type, date, value = row
+            date = datetime.datetime.strptime(date.strip(), '%Y%m%d').date()
+            after, before = map(int, value.split(':'))
+            splits.append(_SPLITS_TUPLE(date, before, after))
+        return splits
+    finally:
+        response.close()
+
+
 _FIELDS = {
     'l1': 'price',
     'r0': 'pe_ratio',
