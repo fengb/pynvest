@@ -12,7 +12,9 @@ def convert_string(field, strptime_string=None, strptime_cache={}):
         return decimal.Decimal(field)
 
 
-def _ichart_request(params, start_date, end_date):
+def _ichart_request(symbol, start_date, end_date, extra_params=[], resource='table.csv'):
+    params = ['s=' + symbol]
+    params.extend(extra_params)
     # Yahoo API is really terrible... abcdef go!
     if start_date:
         params.extend([
@@ -27,11 +29,11 @@ def _ichart_request(params, start_date, end_date):
             'e=%d' % (end_date.day),
             'f=%d' % (end_date.year),
         ])
-    return urllib2.urlopen('http://ichart.finance.yahoo.com/table.csv?' + '&'.join(params))
+    return urllib2.urlopen('http://ichart.finance.yahoo.com/%s?%s' % (resource, '&'.join(params)))
 
 
 def historical_prices(symbol, start_date=None, end_date=None):
-    response = _ichart_request(['s=%s' % symbol], start_date, end_date)
+    response = _ichart_request(symbol, start_date, end_date)
     try:
         raw = csv.reader(response)
 
@@ -43,7 +45,7 @@ def historical_prices(symbol, start_date=None, end_date=None):
 
 _DIVIDENDS_TUPLE = collections.namedtuple('Dividend', 'date amount')
 def dividends(symbol, start_date=None, end_date=None):
-    response = _ichart_request(['s=%s' % symbol, 'g=v'], start_date, end_date)
+    response = _ichart_request(symbol, start_date, end_date, extra_params=['g=v'])
     try:
         raw = csv.reader(response)
 
