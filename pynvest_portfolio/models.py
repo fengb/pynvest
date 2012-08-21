@@ -1,5 +1,6 @@
 from django.db import models
 import pynvest_investment
+import decimal
 
 
 class Portfolio(models.Model):
@@ -74,7 +75,7 @@ class Transaction(models.Model):
         return self.lot.base_transaction()
 
     def value(self):
-        return self.price * self.shares
+        return self.price * decimal.Decimal(self.shares)
 
     def realized_gain(self):
         return -self.shares * (self.price - self.base_transaction().price)
