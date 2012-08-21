@@ -85,11 +85,11 @@ class Snapshot(models.Model):
             return self.filter(date__lte=end_date, date__gte=start_date)
 
         def close_adjusted(self):
-            func = 'PRODUCT(close / (close + dividend))'
+            func = 'PRODUCT(close / (close + dividend) * split_before / split_after)'
             subquery = '''SELECT %(table)s.close * COALESCE(%(func)s, 1)
                             FROM %(table)s t
                            WHERE investment_id = %(table)s.investment_id
-                             AND dividend > 0
+                             AND (dividend > 0 OR split_before != 1 OR split_after != 1)
                              AND date > %(table)s.date
                        ''' % {'table': self.model._meta.db_table, 'func': func}
             return self.extra(select={'close_adjusted': subquery})
