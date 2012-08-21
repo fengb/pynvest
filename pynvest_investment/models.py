@@ -71,6 +71,12 @@ class Snapshot(models.Model):
     def dividend_percent(self):
         return self.dividend / self.close
 
+    def split(self):
+        if self.split_before == 1 and self.split_after == 1:
+            return ''
+
+        return '%d:%d' % (self.split_after, self.split_before)
+
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
         def filter_year_range(self, end_date=None):
@@ -134,7 +140,7 @@ class Snapshot(models.Model):
                 splits = pynvest_connect.splits(investment.symbol)
                 for split in splits:
                     snapshot = investment.snapshot_set.get(date=split.date)
-                    if not (snapshot.split_before == 1 and snapshot.split_after == 1):
+                    if snapshot.split():
                           break
 
                     snapshot.split_before = split.before
