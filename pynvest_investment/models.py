@@ -61,7 +61,9 @@ class Snapshot(models.Model):
     high            = models.DecimalField(max_digits=12, decimal_places=4)
     low             = models.DecimalField(max_digits=12, decimal_places=4)
     close           = models.DecimalField(max_digits=12, decimal_places=4)
-    dividend        = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    dividend        = models.DecimalField(max_digits=10, decimal_places=4, default=0)
+    split_before    = models.IntegerField(default=1)
+    split_after     = models.IntegerField(default=1)
 
     class Meta:
         unique_together = [('investment', 'date')]
