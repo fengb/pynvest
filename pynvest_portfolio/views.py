@@ -44,7 +44,7 @@ def portfolio_sales(request, id, year=None):
 
 def portfolio_transactions(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    transactions = models.Transaction.objects.raw('''SELECT MIN(t.id) as id, MIN(lot_id) as lot_id, date, price, SUM(shares) as shares
+    transactions = models.Transaction.objects.raw('''SELECT MIN(t.id) AS id, MIN(lot_id) AS lot_id, date, price, SUM(shares) AS shares
                                                        FROM pynvest_portfolio_transaction t
                                                        JOIN pynvest_portfolio_lot l
                                                          ON l.id = lot_id
