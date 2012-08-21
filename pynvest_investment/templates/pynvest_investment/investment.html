@@ -11,7 +11,7 @@
     <dd>{{ investment.name }}</dd>
 
     <dt>Price</dt>
-    <dd>{{ investment.current_price|floatformat:2 }} (<a href='{% url investment_snapshots investment.symbol %}'>historical prices</a>)</dd>
+    <dd>{{ investment.latest_snapshot.close|floatformat:2 }} (<a href='{% url investment_snapshots investment.symbol investment.latest_snapshot.date.year %}'>historical prices</a>)</dd>
 
     <dt>52 week range</dt>
     <dd>{{ investment.year_low|floatformat:2 }} - {{ investment.year_high|floatformat:2 }}</dd>

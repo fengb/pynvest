@@ -25,3 +25,7 @@ def historical_prices(*args, **kwargs):
 
 def dividends(*args, **kwargs):
     return module(kwargs).dividends(*args, **kwargs)
+
+
+def splits(*args, **kwargs):
+    return module(kwargs).splits(*args, **kwargs)

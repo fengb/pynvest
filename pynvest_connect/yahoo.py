@@ -12,7 +12,9 @@ def convert_string(field, strptime_string=None, strptime_cache={}):
         return decimal.Decimal(field)
 
 
-def _ichart_request(params, start_date, end_date):
+def _ichart_request(symbol, start_date, end_date, extra_params=[], resource='table.csv'):
+    params = ['s=' + symbol]
+    params.extend(extra_params)
     # Yahoo API is really terrible... abcdef go!
     if start_date:
         params.extend([
@@ -27,11 +29,11 @@ def _ichart_request(params, start_date, end_date):
             'e=%d' % (end_date.day),
             'f=%d' % (end_date.year),
         ])
-    return urllib2.urlopen('http://ichart.finance.yahoo.com/table.csv?' + '&'.join(params))
+    return urllib2.urlopen('http://ichart.finance.yahoo.com/%s?%s' % (resource, '&'.join(params)))
 
 
 def historical_prices(symbol, start_date=None, end_date=None):
-    response = _ichart_request(['s=%s' % symbol], start_date, end_date)
+    response = _ichart_request(symbol, start_date, end_date)
     try:
         raw = csv.reader(response)
 
@@ -43,12 +45,33 @@ def historical_prices(symbol, start_date=None, end_date=None):
 
 _DIVIDENDS_TUPLE = collections.namedtuple('Dividend', 'date amount')
 def dividends(symbol, start_date=None, end_date=None):
-    response = _ichart_request(['s=%s' % symbol, 'g=v'], start_date, end_date)
+    response = _ichart_request(symbol, start_date, end_date, extra_params=['g=v'])
     try:
         raw = csv.reader(response)
 
         next(raw) # remove directives row
         return [_DIVIDENDS_TUPLE(*map(convert_string, row)) for row in raw]
+    finally:
+        response.close()
+
+
+_SPLITS_TUPLE = collections.namedtuple('Split', 'date before after')
+def splits(symbol, start_date=None, end_date=None):
+    # What the hell is 'x'?  I really hate Yahoo API...
+    response = _ichart_request(symbol, start_date, end_date, extra_params=['g=v'], resource='x')
+    try:
+        raw = csv.reader(response)
+
+        next(raw) # remove directives row. Useless AND wrong this time!
+        splits = []
+        for row in raw:
+            if row[0].lower() != 'split':
+                continue
+            type, date, value = row
+            date = datetime.datetime.strptime(date.strip(), '%Y%m%d').date()
+            after, before = map(int, value.split(':'))
+            splits.append(_SPLITS_TUPLE(date, before, after))
+        return splits
     finally:
         response.close()
 

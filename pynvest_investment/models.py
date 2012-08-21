@@ -40,8 +40,8 @@ class Investment(models.Model):
     def __unicode__(self):
         return u'%s' % (self.symbol)
 
-    def current_price(self):
-        return self.snapshot_set.latest('date').close
+    def latest_snapshot(self):
+        return self.snapshot_set.latest('date')
 
     def _year_data(self, field):
         if not hasattr(self, '_year_data_cache'):
@@ -61,13 +61,21 @@ class Snapshot(models.Model):
     high            = models.DecimalField(max_digits=12, decimal_places=4)
     low             = models.DecimalField(max_digits=12, decimal_places=4)
     close           = models.DecimalField(max_digits=12, decimal_places=4)
-    dividend        = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    dividend        = models.DecimalField(max_digits=10, decimal_places=4, default=0)
+    split_before    = models.IntegerField(default=1)
+    split_after     = models.IntegerField(default=1)
 
     class Meta:
         unique_together = [('investment', 'date')]
 
     def dividend_percent(self):
         return self.dividend / self.close
+
+    def split(self):
+        if self.split_before == 1 and self.split_after == 1:
+            return ''
+
+        return '%d:%d' % (self.split_after, self.split_before)
 
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
@@ -77,11 +85,11 @@ class Snapshot(models.Model):
             return self.filter(date__lte=end_date, date__gte=start_date)
 
         def close_adjusted(self):
-            func = 'PRODUCT(close / (close + dividend))'
+            func = 'PRODUCT(close / (close + dividend) * split_before / split_after)'
             subquery = '''SELECT %(table)s.close * COALESCE(%(func)s, 1)
                             FROM %(table)s t
                            WHERE investment_id = %(table)s.investment_id
-                             AND dividend > 0
+                             AND (dividend > 0 OR split_before != 1 OR split_after != 1)
                              AND date > %(table)s.date
                        ''' % {'table': self.model._meta.db_table, 'func': func}
             return self.extra(select={'close_adjusted': subquery})
@@ -127,6 +135,16 @@ class Snapshot(models.Model):
                           break
 
                     snapshot.dividend = dividend.amount
+                    snapshot.save()
+
+                splits = pynvest_connect.splits(investment.symbol)
+                for split in splits:
+                    snapshot = investment.snapshot_set.get(date=split.date)
+                    if snapshot.split():
+                          break
+
+                    snapshot.split_before = split.before
+                    snapshot.split_after = split.after
                     snapshot.save()
             except urllib2.HTTPError, e:
                 if e.code != 404:
