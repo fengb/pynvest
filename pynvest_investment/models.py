@@ -3,25 +3,14 @@ import django
 import pynvest_connect
 import datetime
 import urllib2
+import math
 
 from . import managers
 
 @django.dispatch.receiver(django.db.backends.signals.connection_created)
 def add_sqlite_math_functions(connection, **kwargs):
-    if connection.vendor != 'sqlite':
-        return
-
-    class Product:
-        def __init__(self):
-            self.product = 1
-
-        def step(self, value):
-            self.product *= value
-
-        def finalize(self):
-            return self.product
-
-    connection.connection.create_aggregate('product', 1, Product)
+    connection.connection.create_function('ln', 1, math.log)
+    connection.connection.create_function('exp', 1, math.exp)
 
 
 class Exchange(models.Model):
@@ -85,7 +74,7 @@ class Snapshot(models.Model):
             return self.filter(date__lte=end_date, date__gte=start_date)
 
         def close_adjusted(self):
-            func = 'PRODUCT(close / (close + dividend) * split_before / split_after)'
+            func = 'EXP(SUM(LN(close * split_before / ((close + dividend) * split_after))))'
             subquery = '''SELECT %(table)s.close * COALESCE(%(func)s, 1)
                             FROM %(table)s t
                            WHERE investment_id = %(table)s.investment_id
