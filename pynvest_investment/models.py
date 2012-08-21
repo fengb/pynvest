@@ -74,7 +74,7 @@ class Snapshot(models.Model):
             return self.filter(date__lte=end_date, date__gte=start_date)
 
         def close_adjusted(self):
-            func = 'EXP(SUM(LN(close * split_before / ((close + dividend) * split_after))))'
+            func = 'EXP(SUM(LN(close / (close + dividend) * split_before / split_after)))'
             subquery = '''SELECT %(table)s.close * COALESCE(%(func)s, 1)
                             FROM %(table)s t
                            WHERE investment_id = %(table)s.investment_id
@@ -85,55 +85,58 @@ class Snapshot(models.Model):
 
     @classmethod
     @transaction.commit_on_success
-    def batch_populate(cls, fix_existing=False):
-        investments = Investment.objects.all()
+    def batch_populate(cls, *investments, **kwargs):
+        fix_existing = kwargs.pop('fix_existing', False)
+        investments = investments or Investment.objects.all()
 
         for investment in investments:
             if isinstance(investment, basestring):
                 investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
 
             try:
-                existing_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
+                all_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
                 prices = pynvest_connect.historical_prices(investment.symbol)
+                dirty_snapshots = set()
                 for row in prices:
-                    if row.date in existing_snapshots:
-                        snapshot = existing_snapshots[row.date]
-                        if (snapshot.high  != row.high or
-                            snapshot.low   != row.low or
-                            snapshot.close != row.close):
-                            snapshot.high = row.high
-                            snapshot.low = row.low
-                            snapshot.close = row.close
-                            snapshot.save()
-                        elif not fix_existing:
-                            # Assume the rest are duplicate entries
+                    snapshot = all_snapshots.setdefault(row.date, Snapshot(investment=investment, date=row.date))
+                    if (snapshot.high  == row.high and
+                        snapshot.low   == row.low and
+                        snapshot.close == row.close):
+                        if fix_existing:
+                            continue
+                        else:
                             break
-                    else:
-                        snapshot = Snapshot.objects.create(
-                            investment=investment,
-                            date=row.date,
-                            high=row.high,
-                            low=row.low,
-                            close=row.close,
-                        )
+
+                    snapshot.high = row.high
+                    snapshot.low = row.low
+                    snapshot.close = row.close
+                    dirty_snapshots.add(snapshot)
 
                 dividends = pynvest_connect.dividends(investment.symbol)
                 for dividend in dividends:
-                    snapshot = investment.snapshot_set.get(date=dividend.date)
-                    if snapshot.dividend:
-                          break
+                    snapshot = all_snapshots[dividend.date]
+                    if snapshot.dividend == dividend.amount:
+                        if fix_existing:
+                            continue
+                        else:
+                            break
 
                     snapshot.dividend = dividend.amount
-                    snapshot.save()
+                    dirty_snapshots.add(snapshot)
 
                 splits = pynvest_connect.splits(investment.symbol)
                 for split in splits:
-                    snapshot = investment.snapshot_set.get(date=split.date)
-                    if snapshot.split():
-                          break
+                    snapshot = all_snapshots[split.date]
+                    if snapshot.split_before == split.before and snapshot.split_after == split.after:
+                        if fix_existing:
+                            continue
+                        else:
+                            break
 
                     snapshot.split_before = split.before
                     snapshot.split_after = split.after
+                    dirty_snapshots.add(snapshot)
+                for snapshot in dirty_snapshots:
                     snapshot.save()
             except urllib2.HTTPError, e:
                 if e.code != 404:
