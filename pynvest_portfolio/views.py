@@ -54,6 +54,6 @@ def portfolio_transactions(request, id, year=None):
                                                   ''', [portfolio.id])
 
     return render_to_response('pynvest_portfolio/transactions.html', {
-        'portfolio': portfolio,
+        'title': portfolio.name,
         'transactions': transactions,
     })
