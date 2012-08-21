@@ -130,6 +130,16 @@ class Snapshot(models.Model):
 
                     snapshot.dividend = dividend.amount
                     snapshot.save()
+
+                splits = pynvest_connect.splits(investment.symbol)
+                for split in splits:
+                    snapshot = investment.snapshot_set.get(date=split.date)
+                    if not (snapshot.split_before == 1 and snapshot.split_after == 1):
+                          break
+
+                    snapshot.split_before = split.before
+                    snapshot.split_after = split.after
+                    snapshot.save()
             except urllib2.HTTPError, e:
                 if e.code != 404:
                     raise
