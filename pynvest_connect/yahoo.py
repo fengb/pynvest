@@ -68,7 +68,9 @@ def splits(symbol, start_date=None, end_date=None):
             if row[0].lower() != 'split':
                 continue
             type, date, value = row
+            # Can't use convert_string because date is in a different format...
             date = datetime.datetime.strptime(date.strip(), '%Y%m%d').date()
+            # Split 2:1 means 1 share turns into 2
             after, before = map(int, value.split(':'))
             splits.append(_SPLITS_TUPLE(date, before, after))
         return splits
