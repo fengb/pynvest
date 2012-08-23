@@ -38,13 +38,16 @@ class TestSnapshotCloseAdjusted(TestCase):
         '''Example split calculation:
         Date        Price  Split  Adj.Price
         2012-04-03     10    2:1      10.00
-        2012-04-02     20              9.00
-        2012-04-01     21              9.50
+        2012-04-02     20             10.00
+        2012-04-01     21             10.50
         '''
         snapshot0 = self.create_snapshot(close=10, split_before=1, split_after=2)
-        snapshot1 = self.create_snapshot(close=10, date=(datetime.date.today() - datetime.timedelta(1)))
+        snapshot1 = self.create_snapshot(close=20, date=(datetime.date.today() - datetime.timedelta(1)))
+        snapshot2 = self.create_snapshot(close=21, date=(datetime.date.today() - datetime.timedelta(2)))
 
-        self.assertCloseAdjusted(snapshot1, 5)
+        self.assertCloseAdjusted(snapshot0, 10)
+        self.assertCloseAdjusted(snapshot1, 10)
+        self.assertCloseAdjusted(snapshot2, 10.5)
 
     def test_dividend_adjusts_close_based_on_percentage(self):
         '''Example dividend calculation:
@@ -62,6 +65,7 @@ class TestSnapshotCloseAdjusted(TestCase):
         snapshot1 = self.create_snapshot(close=10, date=(datetime.date.today() - datetime.timedelta(1)))
         snapshot2 = self.create_snapshot(close=9, date=(datetime.date.today() - datetime.timedelta(2)))
 
+        self.assertCloseAdjusted(snapshot0, 9)
         self.assertCloseAdjusted(snapshot1, 9)
         self.assertCloseAdjusted(snapshot2, 8.1)
 
@@ -73,11 +77,12 @@ class TestSnapshotCloseAdjusted(TestCase):
         2012-04-02     20                   9.00
         2012-04-01     22                   9.90
         '''
-        base = self.create_snapshot(close=9, dividend=1)
+        snapshot0 = self.create_snapshot(close=9, dividend=1)
         snapshot1 = self.create_snapshot(close=10, split_before=1, split_after=2, date=(datetime.date.today() - datetime.timedelta(1)))
         snapshot2 = self.create_snapshot(close=20, date=(datetime.date.today() - datetime.timedelta(2)))
         snapshot3 = self.create_snapshot(close=22, date=(datetime.date.today() - datetime.timedelta(3)))
 
+        self.assertCloseAdjusted(snapshot0, 9)
         self.assertCloseAdjusted(snapshot1, 9)
         self.assertCloseAdjusted(snapshot2, 9)
         self.assertCloseAdjusted(snapshot3, 9.9)
