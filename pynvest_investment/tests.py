@@ -25,11 +25,18 @@ class TestSnapshotCloseAdjusted(TestCase):
         return models.Snapshot.objects.create(**data)
 
     def test_standalone_is_close(self):
-        snapshot = self.create_snapshot()
+        '''Standalone snapshot always has close_adjusted == close'''
+        snapshot = self.create_snapshot(dividend=1.2345, split_before=1, split_after=42)
         snapshot = models.Snapshot.objects.close_adjusted().get(id=snapshot.id)
         self.assertEquals(snapshot.close_adjusted, snapshot.close)
 
     def test_split_adjusts_close_as_multiple(self):
+        '''Example split calculation:
+        Date        Price  Split  Adj.Price
+        2012-04-03     10    2:1      10.00
+        2012-04-02     20              9.00
+        2012-04-01     21              9.50
+        '''
         base = self.create_snapshot(close=10, split_before=1, split_after=2)
         snapshot = self.create_snapshot(close=10, date=(datetime.date.today() - datetime.timedelta(1)))
 
@@ -40,8 +47,8 @@ class TestSnapshotCloseAdjusted(TestCase):
         '''Example dividend calculation:
         Date        Price  Div  Adj.Price
         2012-04-03      9    1       9.00
-        2012-04-02     10    0       9.00
-        2012-04-01      9    0       8.10
+        2012-04-02     10            9.00
+        2012-04-01      9            8.10
 
         Explanation:  Spinning off $1 while dropping the price by $1 actually
         keeps the value identical to before.  Because we need to keep this
