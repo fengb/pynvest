@@ -10,6 +10,7 @@ def investment(request, symbol):
     return render_to_response('pynvest_investment/investment.html', {
         'title': investment.symbol,
         'investment': investment,
+        'year': datetime.date.today().year,
     })
 
 

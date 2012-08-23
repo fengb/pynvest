@@ -40,7 +40,7 @@ class Lot(models.Model):
         return self.purchase_price() * self.outstanding_shares
 
     def current_price(self):
-        return self.investment.latest_snapshot().close
+        return self.investment.current_price()
 
     def current_value(self):
         return self.current_price() * self.outstanding_shares

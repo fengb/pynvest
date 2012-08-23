@@ -29,8 +29,8 @@ class Investment(models.Model):
     def __unicode__(self):
         return u'%s' % (self.symbol)
 
-    def latest_snapshot(self):
-        return self.snapshot_set.latest('date')
+    def current_price(self):
+        return self.snapshot_set.latest('date').close
 
     def _year_data(self, field):
         if not hasattr(self, '_year_data_cache'):
