@@ -31,8 +31,8 @@ class TestSnapshotCloseAdjusted(TestCase):
     def test_standalone_is_close(self):
         '''Standalone snapshot always has close_adjusted == close'''
         snapshot0 = self.create_snapshot(dividend=1.2345, split_before=1, split_after=42)
-        snapshot0 = models.Snapshot.objects.close_adjusted().get(id=snapshot0.id)
-        self.assertEquals(snapshot0.close_adjusted, snapshot0.close)
+
+        self.assertCloseAdjusted(snapshot0, snapshot0.close)
 
     def test_split_adjusts_close_as_multiple(self):
         '''Example split calculation:
@@ -64,3 +64,20 @@ class TestSnapshotCloseAdjusted(TestCase):
 
         self.assertCloseAdjusted(snapshot1, 9)
         self.assertCloseAdjusted(snapshot2, 8.1)
+
+    def test_multiple_events(self):
+        '''Example:
+        Date        Price  Div  Split  Adj.Price
+        2012-04-04      9    1              9.00
+        2012-04-03     10         2:1       9.00
+        2012-04-02     20                   9.00
+        2012-04-01     22                   9.90
+        '''
+        base = self.create_snapshot(close=9, dividend=1)
+        snapshot1 = self.create_snapshot(close=10, split_before=1, split_after=2, date=(datetime.date.today() - datetime.timedelta(1)))
+        snapshot2 = self.create_snapshot(close=20, date=(datetime.date.today() - datetime.timedelta(2)))
+        snapshot3 = self.create_snapshot(close=22, date=(datetime.date.today() - datetime.timedelta(3)))
+
+        self.assertCloseAdjusted(snapshot1, 9)
+        self.assertCloseAdjusted(snapshot2, 9)
+        self.assertCloseAdjusted(snapshot3, 9.9)
