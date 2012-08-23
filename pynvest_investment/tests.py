@@ -24,11 +24,15 @@ class TestSnapshotCloseAdjusted(TestCase):
         data.update(kwargs)
         return models.Snapshot.objects.create(**data)
 
+    def assertCloseAdjusted(self, snapshot, value):
+        snapshot = models.Snapshot.objects.close_adjusted().get(id=snapshot.id)
+        self.assertEquals(round(snapshot.close_adjusted, 4), value)
+
     def test_standalone_is_close(self):
         '''Standalone snapshot always has close_adjusted == close'''
-        snapshot = self.create_snapshot(dividend=1.2345, split_before=1, split_after=42)
-        snapshot = models.Snapshot.objects.close_adjusted().get(id=snapshot.id)
-        self.assertEquals(snapshot.close_adjusted, snapshot.close)
+        snapshot0 = self.create_snapshot(dividend=1.2345, split_before=1, split_after=42)
+        snapshot0 = models.Snapshot.objects.close_adjusted().get(id=snapshot0.id)
+        self.assertEquals(snapshot0.close_adjusted, snapshot0.close)
 
     def test_split_adjusts_close_as_multiple(self):
         '''Example split calculation:
@@ -37,11 +41,10 @@ class TestSnapshotCloseAdjusted(TestCase):
         2012-04-02     20              9.00
         2012-04-01     21              9.50
         '''
-        base = self.create_snapshot(close=10, split_before=1, split_after=2)
-        snapshot = self.create_snapshot(close=10, date=(datetime.date.today() - datetime.timedelta(1)))
+        snapshot0 = self.create_snapshot(close=10, split_before=1, split_after=2)
+        snapshot1 = self.create_snapshot(close=10, date=(datetime.date.today() - datetime.timedelta(1)))
 
-        snapshot = models.Snapshot.objects.close_adjusted().get(id=snapshot.id)
-        self.assertEquals(snapshot.close_adjusted, 5)
+        self.assertCloseAdjusted(snapshot1, 5)
 
     def test_dividend_adjusts_close_based_on_percentage(self):
         '''Example dividend calculation:
@@ -55,11 +58,9 @@ class TestSnapshotCloseAdjusted(TestCase):
         "change" constant, the adjusted price of past snapshots must drop to
         90%.  Multiplier = p[n] / (p[n] + d[n])
         '''
-        base = self.create_snapshot(close=9, dividend=1)
+        snapshot0 = self.create_snapshot(close=9, dividend=1)
         snapshot1 = self.create_snapshot(close=10, date=(datetime.date.today() - datetime.timedelta(1)))
-        snapshot1 = models.Snapshot.objects.close_adjusted().get(id=snapshot1.id)
-        self.assertEquals(snapshot1.close_adjusted, 9)
-
         snapshot2 = self.create_snapshot(close=9, date=(datetime.date.today() - datetime.timedelta(2)))
-        snapshot2 = models.Snapshot.objects.close_adjusted().get(id=snapshot2.id)
-        self.assertEquals(snapshot2.close_adjusted, 8.1)
+
+        self.assertCloseAdjusted(snapshot1, 9)
+        self.assertCloseAdjusted(snapshot2, 8.1)
