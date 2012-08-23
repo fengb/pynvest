@@ -74,8 +74,8 @@ class Snapshot(models.Model):
             return self.filter(date__lte=end_date, date__gte=start_date)
 
         def close_adjusted(self):
-            aggr_func = 'SUM(LN(close / (close + dividend) * split_before / split_after))'
-            subquery = '''SELECT %(table)s.close * EXP(COALESCE(%(aggr_func)s, LN(1)))
+            aggr_func = 'SUM(LN(1.0 * close / (close + dividend) * split_before / split_after))'
+            subquery = '''SELECT %(table)s.close * EXP(COALESCE(%(aggr_func)s, 0))
                             FROM %(table)s t
                            WHERE investment_id = %(table)s.investment_id
                              AND (dividend > 0 OR split_before != 1 OR split_after != 1)
