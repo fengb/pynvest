@@ -3,6 +3,12 @@
 {% block title %}{{ title }}{% endblock title %}
 
 {% block content %}
+  {% if prev_year %}
+    <a href='{% url investment_snapshots investment.symbol prev_year %}'>&lt;</a>
+  {% endif %}
+  {% if next_year %}
+    <a href='{% url investment_snapshots investment.symbol next_year %}'>&gt;</a>
+  {% endif %}
   <table>
     <thead>
       <tr>
