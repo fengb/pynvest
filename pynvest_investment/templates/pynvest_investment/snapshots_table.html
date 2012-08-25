@@ -9,6 +9,7 @@
   {% if next_year %}
     <a href='{% url pynvest_investment.views.snapshots investment.symbol next_year %}'>&gt;</a>
   {% endif %}
+
   <table>
     <thead>
       <tr>
@@ -16,7 +17,7 @@
         <th>High</th>
         <th>Low</th>
         <th>Close</th>
-        <th>Adjusted Close</th>
+        <th>Adj Close</th>
         <th>Events</th>
       </tr>
     </thead>
@@ -30,7 +31,7 @@
           <td>{{ snapshot.close_adjusted|floatformat:4 }}</td>
           <td>
             {% if snapshot.dividend %}
-              Dividend {{ snapshot.dividend|floatformat:4 }}
+              Div {{ snapshot.dividend|floatformat:4 }}
             {% endif %}
             {% if snapshot.split %}
               Split {{ snapshot.split }}
@@ -40,4 +41,11 @@
       </tbody>
     {% endfor %}
   </table>
+
+  {% if prev_year %}
+    <a href='{% url pynvest_investment.views.snapshots investment.symbol prev_year %}'>&lt;</a>
+  {% endif %}
+  {% if next_year %}
+    <a href='{% url pynvest_investment.views.snapshots investment.symbol next_year %}'>&gt;</a>
+  {% endif %}
 {% endblock content %}
