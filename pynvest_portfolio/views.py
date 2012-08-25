@@ -3,6 +3,13 @@ from . import models, presenters
 import pynvest_investment
 
 
+def portfolio_list(request):
+    portfolios = models.Portfolio.objects.all()
+    return render_to_response('pynvest_portfolio/list.html', {
+        'title': 'Portfolios',
+        'portfolios': portfolios,
+    })
+
 def portfolio_summary(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     lots = models.Lot.objects.filter(portfolio=portfolio, outstanding_shares__gt=0)
