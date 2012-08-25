@@ -13,7 +13,7 @@ def list(request):
 def summary(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     lots = models.Lot.objects.filter(portfolio=portfolio, outstanding_shares__gt=0)
-    return render_to_response('pynvest_portfolio/lot_summary_table.html', {
+    return render_to_response('pynvest_portfolio/summary_table.html', {
         'title': portfolio.name,
         'lot_summarys': presenters.LotSummary.group_by_investment(lots),
     })
@@ -43,7 +43,7 @@ def sales(request, id, year=None):
     if year:
         transactions = transactions.filter(date__year=year)
 
-    return render_to_response('pynvest_portfolio/transaction_sales_table.html', {
+    return render_to_response('pynvest_portfolio/sales_table.html', {
         'title': portfolio.name,
         'transactions': transactions,
     })
