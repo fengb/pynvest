@@ -4,8 +4,10 @@
 
 {% block content %}
   <ul>
-    {% for portfolio in portfolios %}
-      <li><a href='{% url pynvest_portfolio.views.summary portfolio.id %}'>{{ portfolio.name }}</a></li>
+    {% for lot_summary in lot_summarys %}
+      {% with lot_summary.portfolio as portfolio %}
+      <li><a href='{% url pynvest_portfolio.views.summary portfolio.id %}'>{{ portfolio.name }}</a> ({{ lot_summary.current_value|floatformat:4 }})</li>
+      {% endwith %}
     {% endfor %}
   </ul>
 {% endblock %}

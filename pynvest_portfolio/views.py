@@ -7,7 +7,7 @@ def list(request):
     portfolios = models.Portfolio.objects.all()
     return render_to_response('pynvest_portfolio/list.html', {
         'title': 'Portfolios',
-        'portfolios': portfolios,
+        'lot_summarys': [presenters.LotSummary(portfolio.lot_set.all()) for portfolio in portfolios],
     })
 
 def summary(request, id):

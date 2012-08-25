@@ -29,6 +29,9 @@ class LotSummary(object):
     def _sum_field(self, field):
         return sum(self._values(field))
 
+    def portfolio(self):
+        return self._unique_field('portfolio')
+
     def investment(self):
         return self._unique_field('investment')
 
