@@ -4,10 +4,10 @@
 
 {% block content %}
   {% if prev_year %}
-    <a href='{% url pynvest_investment.views.investment_snapshots investment.symbol prev_year %}'>&lt;</a>
+    <a href='{% url pynvest_investment.views.snapshots investment.symbol prev_year %}'>&lt;</a>
   {% endif %}
   {% if next_year %}
-    <a href='{% url pynvest_investment.views.investment_snapshots investment.symbol next_year %}'>&gt;</a>
+    <a href='{% url pynvest_investment.views.snapshots investment.symbol next_year %}'>&gt;</a>
   {% endif %}
   <table>
     <thead>

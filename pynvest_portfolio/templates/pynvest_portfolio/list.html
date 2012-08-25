@@ -5,7 +5,7 @@
 {% block content %}
   <ul>
     {% for portfolio in portfolios %}
-      <li><a href='{% url pynvest_portfolio.views.portfolio_summary portfolio.id %}'>{{ portfolio.name }}</a></li>
+      <li><a href='{% url pynvest_portfolio.views.summary portfolio.id %}'>{{ portfolio.name }}</a></li>
     {% endfor %}
   </ul>
 {% endblock %}

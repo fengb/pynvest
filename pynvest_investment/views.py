@@ -7,17 +7,17 @@ import decimal
 def current_year():
     return datetime.date.today().year
 
-def investment(request, symbol):
+def summary(request, symbol):
     investment = get_object_or_404(models.Investment, symbol=symbol)
 
-    return render_to_response('pynvest_investment/investment.html', {
+    return render_to_response('pynvest_investment/summary.html', {
         'title': investment.symbol,
         'investment': investment,
         'year': current_year(),
     })
 
 
-def investment_snapshots(request, symbol, year):
+def snapshots(request, symbol, year):
     investment = get_object_or_404(models.Investment, symbol=symbol)
     year = int(year)
 

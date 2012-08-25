@@ -3,14 +3,14 @@ from . import models, presenters
 import pynvest_investment
 
 
-def portfolio_list(request):
+def list(request):
     portfolios = models.Portfolio.objects.all()
     return render_to_response('pynvest_portfolio/list.html', {
         'title': 'Portfolios',
         'portfolios': portfolios,
     })
 
-def portfolio_summary(request, id):
+def summary(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     lots = models.Lot.objects.filter(portfolio=portfolio, outstanding_shares__gt=0)
     return render_to_response('pynvest_portfolio/lot_summary_table.html', {
@@ -19,7 +19,7 @@ def portfolio_summary(request, id):
     })
 
 
-def portfolio_growth(request, id, compare=None):
+def growth(request, id, compare=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
 
     growths = [presenters.PortfolioGrowth(portfolio)]
@@ -36,7 +36,7 @@ def portfolio_growth(request, id, compare=None):
     })
 
 
-def portfolio_sales(request, id, year=None):
+def sales(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, shares__lt=0
                                             ).order_by('date', 'lot__investment')
@@ -49,7 +49,7 @@ def portfolio_sales(request, id, year=None):
     })
 
 
-def portfolio_transactions(request, id, year=None):
+def transactions(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
     transactions = models.Transaction.objects.raw('''SELECT MIN(t.id) AS id, MIN(lot_id) AS lot_id, date, price, SUM(shares) AS shares
                                                        FROM pynvest_portfolio_transaction t
