@@ -96,7 +96,7 @@ class Snapshot(models.Model):
             try:
                 all_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
                 prices = pynvest_connect.historical_prices(investment.symbol)
-                dirty_snapshots = set()
+                dirty_dates = set()
                 for row in prices:
                     snapshot = all_snapshots.setdefault(row.date, Snapshot(investment=investment, date=row.date))
                     if (snapshot.high  == row.high and
@@ -110,7 +110,7 @@ class Snapshot(models.Model):
                     snapshot.high = row.high
                     snapshot.low = row.low
                     snapshot.close = row.close
-                    dirty_snapshots.add(snapshot)
+                    dirty_dates.add(snapshot.date)
 
                 dividends = pynvest_connect.dividends(investment.symbol)
                 for dividend in dividends:
@@ -122,7 +122,7 @@ class Snapshot(models.Model):
                             break
 
                     snapshot.dividend = dividend.amount
-                    dirty_snapshots.add(snapshot)
+                    dirty_dates.add(snapshot.date)
 
                 splits = pynvest_connect.splits(investment.symbol)
                 for split in splits:
@@ -135,9 +135,9 @@ class Snapshot(models.Model):
 
                     snapshot.split_before = split.before
                     snapshot.split_after = split.after
-                    dirty_snapshots.add(snapshot)
-                for snapshot in dirty_snapshots:
-                    snapshot.save()
+                    dirty_dates.add(snapshot.date)
+                for date in dirty_dates:
+                    all_snapshots[date].save()
             except urllib2.HTTPError, e:
                 if e.code != 404:
                     raise
