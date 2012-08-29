@@ -64,3 +64,16 @@ def transactions(request, id, year=None):
         'title': portfolio.name,
         'transactions': transactions,
     })
+
+
+def adjustments(request, id, year=None):
+    portfolio = get_object_or_404(models.Portfolio, id=id)
+    adjustments = models.Adjustment.objects.filter(portfolio=portfolio
+                                          ).order_by('date', 'investment')
+    if year:
+        transactions = transactions.filter(date__year=year)
+
+    return render_to_response('pynvest_portfolio/adjustments.html', {
+        'title': portfolio.name,
+        'adjustments': adjustments,
+    })

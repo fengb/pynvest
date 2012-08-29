@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+  <table>
+    <thead>
+      <tr>
+        <th>Investment</th>
+        <th>Date</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    {% for adjustment in adjustments %}
+      <tbody>
+        <tr>
+          <th>{{ adjustment.investment }}</th>
+          <td>{{ adjustment.date }}</td>
+          <td>{{ adjustment.value|floatformat:'4' }}</td>
+        </tr>
+      </tbody>
+    {% endfor %}
+  </table>
+{% endblock content %}
