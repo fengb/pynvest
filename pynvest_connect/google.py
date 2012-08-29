@@ -19,7 +19,7 @@ def historical_prices(symbol, start_date=None, end_date=None):
     if start_date:
         params.append(start_date.strftime('startdate=%b+%d,+%Y'))
     if end_date:
-        params.append(start_date.strftime('startdate=%b+%d,+%Y'))
+        params.append(start_date.strftime('enddate=%b+%d,+%Y'))
 
     response = urllib2.urlopen('http://www.google.com/finance/historical?' + '&'.join(params))
     try:
