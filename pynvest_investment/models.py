@@ -9,6 +9,9 @@ from . import managers
 
 @django.dispatch.receiver(django.db.backends.signals.connection_created)
 def add_sqlite_math_functions(connection, **kwargs):
+    if connection.vendor != 'sqlite':
+        return
+
     connection.connection.create_function('ln', 1, math.log)
     connection.connection.create_function('exp', 1, math.exp)
 
