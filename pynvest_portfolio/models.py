@@ -61,8 +61,8 @@ class Lot(models.Model):
 class Transaction(models.Model):
     lot             = models.ForeignKey(Lot)
     date            = models.DateField()
-    price           = models.DecimalField(max_digits=12, decimal_places=4)
     shares          = models.DecimalField(max_digits=15, decimal_places=4)
+    price           = models.DecimalField(max_digits=12, decimal_places=4)
 
     def __unicode__(self):
         return u'%s %s %s' % (self.investment, self.date, self.value())
