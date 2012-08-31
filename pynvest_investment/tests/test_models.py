@@ -1,32 +1,40 @@
-from django.test import TestCase
 from pynvest_investment import models
 
 import decimal
 import datetime
 
 
-class TestSnapshot(TestCase):
+class TestSnapshot(object):
     def test_dividend_percent(self):
         snapshot = models.Snapshot(dividend=decimal.Decimal('0.2'), close=20)
-        self.assertEquals(snapshot.dividend_percent(), decimal.Decimal('0.01'))
+        assert snapshot.dividend_percent() == decimal.Decimal('0.01')
 
     def test_split(self):
         snapshot = models.Snapshot(split_before=5, split_after=9)
-        self.assertEquals(snapshot.split(), '9:5')
+        assert snapshot.split() == '9:5'
 
-class TestSnapshotCloseAdjusted(TestCase):
-    def setUp(self):
+class TestSnapshotCloseAdjusted(object):
+    def setup(self):
+        self.models = []
         exchange = models.Exchange.objects.create(symbol='a', name='b')
         self.investment = models.Investment.objects.create(exchange=exchange, symbol='c', name='d')
+        self.models.append(exchange)
+        self.models.append(self.investment)
+
+    def teardown(self):
+        for model in self.models:
+            model.delete()
 
     def create_snapshot(self, **kwargs):
         data = {'investment': self.investment, 'high': 100, 'low': 1, 'close': 10, 'date': datetime.date.today()}
         data.update(kwargs)
-        return models.Snapshot.objects.create(**data)
+        model = models.Snapshot.objects.create(**data)
+        self.models.append(model)
+        return model
 
     def assertCloseAdjusted(self, snapshot, value):
         snapshot = models.Snapshot.objects.close_adjusted().get(id=snapshot.id)
-        self.assertEquals(round(snapshot.close_adjusted, 4), value)
+        assert round(snapshot.close_adjusted, 4) == value
 
     def test_standalone_is_close(self):
         '''Standalone snapshot always has close_adjusted == close'''
