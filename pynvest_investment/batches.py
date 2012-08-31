@@ -3,17 +3,21 @@ import urllib2
 import pynvest_connect
 from . import models
 
-import sys
+import os
 
 
 @django.db.transaction.commit_on_success
 def populate(*investments, **kwargs):
     fix_existing = kwargs.pop('fix_existing', False)
+    output = kwargs.pop('output', open(os.devnull, 'w'))
     investments = investments or models.Investment.objects.all()
 
-    for investment in investments:
+    num_investments = len(investments)
+    for (index, investment) in enumerate(investments):
         if isinstance(investment, basestring):
             investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
+
+        output.write('%3d/%d %s:\n' % (index + 1, num_investments, investment.symbol))
 
         try:
             all_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
@@ -59,10 +63,11 @@ def populate(*investments, **kwargs):
                 snapshot.split_after = split.after
                 dirty_dates.add(snapshot.date)
             for date in dirty_dates:
+                output.write(date.strftime('\t\t%Y-%m-%d\n'))
                 all_snapshots[date].save()
         except urllib2.HTTPError, e:
             if e.code != 404:
                 raise
             else:
                 # Not found but continue anyway
-                pass
+                output.write('\t\t<404>\n')
