@@ -1,5 +1,5 @@
 from django.db import models, transaction
-import django
+import django.db.backends.signals
 import pynvest_connect
 import datetime
 import urllib2
