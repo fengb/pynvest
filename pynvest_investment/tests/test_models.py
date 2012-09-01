@@ -32,15 +32,15 @@ class TestSnapshotCloseAdjusted(object):
         self.models.append(model)
         return model
 
-    def assertCloseAdjusted(self, snapshot, value):
+    def close_adjusted(self, snapshot):
         snapshot = models.Snapshot.objects.close_adjusted().get(id=snapshot.id)
-        assert round(snapshot.close_adjusted, 4) == value
+        return round(snapshot.close_adjusted, 4)
 
     def test_standalone_is_close(self):
         '''Standalone snapshot always has close_adjusted == close'''
         snapshot0 = self.create_snapshot(dividend=1.2345, split_before=1, split_after=42)
 
-        self.assertCloseAdjusted(snapshot0, snapshot0.close)
+        assert self.close_adjusted(snapshot0) == snapshot0.close
 
     def test_split_adjusts_close_as_multiple(self):
         '''Example split calculation:
@@ -53,9 +53,9 @@ class TestSnapshotCloseAdjusted(object):
         snapshot1 = self.create_snapshot(close=20, date=(datetime.date.today() - datetime.timedelta(1)))
         snapshot2 = self.create_snapshot(close=21, date=(datetime.date.today() - datetime.timedelta(2)))
 
-        self.assertCloseAdjusted(snapshot0, 10)
-        self.assertCloseAdjusted(snapshot1, 10)
-        self.assertCloseAdjusted(snapshot2, 10.5)
+        assert self.close_adjusted(snapshot0) == 10
+        assert self.close_adjusted(snapshot1) == 10
+        assert self.close_adjusted(snapshot2) == 10.5
 
     def test_dividend_adjusts_close_based_on_percentage(self):
         '''Example dividend calculation:
@@ -73,9 +73,9 @@ class TestSnapshotCloseAdjusted(object):
         snapshot1 = self.create_snapshot(close=10, date=(datetime.date.today() - datetime.timedelta(1)))
         snapshot2 = self.create_snapshot(close=9, date=(datetime.date.today() - datetime.timedelta(2)))
 
-        self.assertCloseAdjusted(snapshot0, 9)
-        self.assertCloseAdjusted(snapshot1, 9)
-        self.assertCloseAdjusted(snapshot2, 8.1)
+        assert self.close_adjusted(snapshot0) == 9
+        assert self.close_adjusted(snapshot1) == 9
+        assert self.close_adjusted(snapshot2) == 8.1
 
     def test_multiple_events(self):
         '''Example:
@@ -90,7 +90,7 @@ class TestSnapshotCloseAdjusted(object):
         snapshot2 = self.create_snapshot(close=20, date=(datetime.date.today() - datetime.timedelta(2)))
         snapshot3 = self.create_snapshot(close=22, date=(datetime.date.today() - datetime.timedelta(3)))
 
-        self.assertCloseAdjusted(snapshot0, 9)
-        self.assertCloseAdjusted(snapshot1, 9)
-        self.assertCloseAdjusted(snapshot2, 9)
-        self.assertCloseAdjusted(snapshot3, 9.9)
+        assert self.close_adjusted(snapshot0) == 9
+        assert self.close_adjusted(snapshot1) == 9
+        assert self.close_adjusted(snapshot2) == 9
+        assert self.close_adjusted(snapshot3) == 9.9
