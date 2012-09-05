@@ -38,6 +38,9 @@ class BestMatchDict(object):
     def keys(self):
         return self._keys
 
+    def items(self):
+        return self._items
+
     def __getitem__(self, key):
         i = bisect.bisect(self._keys, key)
         if i == 0:
