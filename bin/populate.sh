@@ -6,7 +6,6 @@ cd $SCRIPT_DIR
 
 
 cd $PROJECT_DIR
-export PYTHONPATH=$SRC_DIR
 export DJANGO_SETTINGS_MODULE=dptest.settings
 python -c '
 import sys
