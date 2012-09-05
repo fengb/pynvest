@@ -2,7 +2,6 @@ import operator
 import bisect
 
 
-# FIXME: RENAME PLEASE
 class BestMatchDict(object):
     '''Nearest match based on key.
 
@@ -26,6 +25,12 @@ class BestMatchDict(object):
 
     def __iter__(self):
         return iter(self._keys)
+
+    def __eq__(self, other):
+        return (isinstance(other, type(self)) and
+                self._items == other._items and
+                self._keys ==  other._keys and
+                self.default == other.default)
 
     def keys(self):
         return self._keys

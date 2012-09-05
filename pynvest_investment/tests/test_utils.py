@@ -3,6 +3,15 @@ import pytest
 
 
 class TestBestMatchDict(object):
+    class TestConstructor(object):
+        def setup(self):
+            # Assumed base case for comparison
+            self.base = utils.BestMatchDict([('a', 'b'), ('c', 'd')])
+
+        def test_out_of_order(self):
+            d = utils.BestMatchDict([('a', 'b'), ('c', 'd')])
+            assert d == self.base
+
     class TestGet(object):
         def setup(self):
             self.d = utils.BestMatchDict([(1, 'first'), (3, 'third')])
