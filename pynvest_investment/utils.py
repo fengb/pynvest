@@ -3,20 +3,20 @@ import bisect
 
 
 # FIXME: RENAME PLEASE
-class BinarySearchThing(object):
+class BestMatchDict(object):
     '''Nearest match based on key.
 
     Example:
-    >>> bst = BinarySearchThing([('b', 'batman'), ('x', 'x-men')], default='aquaman')
-    >>> bst['a']
+    >>> bmd = BestMatchDict([('b', 'batman'), ('x', 'x-men')], default='aquaman')
+    >>> bmd['a']
     'aquaman'
-    >>> bst['b']
+    >>> bmd['b']
     'batman'
-    >>> bst['w']
+    >>> bmd['w']
     'batman'
-    >>> bst['x']
+    >>> bmd['x']
     'x-men'
-    >>> bst['y']
+    >>> bmd['y']
     'x-men'
     '''
     def __init__(self, items, default=None):

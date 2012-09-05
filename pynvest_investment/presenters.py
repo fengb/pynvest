@@ -27,7 +27,7 @@ def PriceFinder(investment, start_date=None):
     if start_date and items[0][0] != start_date:
         # hard cutoff at start_date
         items[0] = (start_date, items[0][1])
-    return utils.BinarySearchThing(items, default=decimal.Decimal(0))
+    return utils.BestMatchDict(items, default=decimal.Decimal(0))
 
 
 class FlatGrowth(object):
@@ -43,7 +43,7 @@ class FlatGrowth(object):
         for (date, shares, value) in sorted(entries):
             sum += shares
             shares_items.append((date, sum))
-        self.shares_finder = utils.BinarySearchThing(shares_items, default=decimal.Decimal(0))
+        self.shares_finder = utils.BestMatchDict(shares_items, default=decimal.Decimal(0))
 
     def __iter__(self):
         return iter(self.price_finder)
@@ -85,7 +85,7 @@ def BenchmarkGrowth(growth, investment):
 
 
 def PrincipalGrowth(growth):
-    price_finder = utils.BinarySearchThing([], default=decimal.Decimal(1))
+    price_finder = utils.BestMatchDict([], default=decimal.Decimal(1))
     return FlatGrowth([(date, cashflow, cashflow) for (date, cashflow) in growth.cashflows()],
                       price_finder=price_finder, name=u'Principal')
 
