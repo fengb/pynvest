@@ -12,6 +12,9 @@ class TestBestMatchDict(object):
             d = utils.BestMatchDict([('a', 'b'), ('c', 'd')])
             assert d == self.base
 
+        def test_dict(self):
+            d = utils.BestMatchDict({'a': 'b', 'c': 'd'})
+
     class TestGet(object):
         def setup(self):
             self.d = utils.BestMatchDict([(1, 'first'), (3, 'third')])

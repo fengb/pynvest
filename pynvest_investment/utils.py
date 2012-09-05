@@ -19,6 +19,9 @@ class BestMatchDict(object):
     'x-men'
     '''
     def __init__(self, items, default=None):
+        if hasattr(items, 'items'):
+            items = items.items()
+
         self._items = sorted(items, key=operator.itemgetter(0))
         self._keys = [key for (key, value) in self._items]
         self.default = default
