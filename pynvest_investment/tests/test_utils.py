@@ -32,6 +32,10 @@ class TestBestMatchDict(object):
             assert self.d[4] == 'third'
             assert self.d[100000] == 'third'
 
-        def test_missing_key_smaller_than_all_keys_generates_exception(self):
+        def test_missing_key_smaller_than_all_keys_generates_exception_when_no_default(self):
             with pytest.raises(KeyError):
                 self.d[0]
+
+        def test_missing_key_smaller_than_all_keys_returns_default(self):
+            self.d = utils.BestMatchDict([(1, 'first'), (3, 'third')], default='zero')
+            assert self.d[0] == 'zero'
