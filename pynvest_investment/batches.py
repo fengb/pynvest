@@ -17,7 +17,7 @@ def populate(*investments, **kwargs):
         if isinstance(investment, basestring):
             investment, created = Investment.objects.get_or_create(symbol=investment, defaults={'name': 'Placeholder'})
 
-        output.write('%3d/%d %s:\n' % (index + 1, num_investments, investment.symbol))
+        output.write('%3d/%d %-11s ' % (index + 1, num_investments, investment.symbol))
 
         try:
             all_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
@@ -62,12 +62,19 @@ def populate(*investments, **kwargs):
                 snapshot.split_before = split.before
                 snapshot.split_after = split.after
                 dirty_dates.add(snapshot.date)
+
+            if dirty_dates:
+                if len(dirty_dates) > 1:
+                    output.write(min(dirty_dates).strftime('%Y-%m-%d - '))
+                output.write(max(dirty_dates).strftime('%Y-%m-%d'))
+
             for date in dirty_dates:
-                output.write(date.strftime('\t\t%Y-%m-%d\n'))
                 all_snapshots[date].save()
+
+            output.write('\n')
         except urllib2.HTTPError, e:
             if e.code != 404:
                 raise
             else:
                 # Not found but continue anyway
-                output.write('\t\t<404>\n')
+                output.write('<404>\n')
