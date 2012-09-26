@@ -7,7 +7,7 @@ cd $SCRIPT_DIR
 
 cd $PROJECT_DIR
 export DJANGO_SETTINGS_MODULE=dptest.settings
-python -c '
+python -u -c '
 import sys
 import pynvest_investment.batches
 
