@@ -12,7 +12,7 @@ def list(request):
 
 def summary(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    lots = models.Lot.objects.filter(portfolio=portfolio, outstanding_shares__gt=0)
+    lots = models.Lot.objects.filter(portfolio=portfolio).exclude(outstanding_shares=0)
     return render_to_response('pynvest_portfolio/summary_table.html', {
         'title': portfolio.name,
         'lot_summarys': presenters.LotSummary.group_by_investment(lots),
