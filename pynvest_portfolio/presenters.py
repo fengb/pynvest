@@ -58,8 +58,9 @@ class LotSummary(object):
 
     @classmethod
     def group_by_investment(cls, lots):
+        lots = sorted(lots, key=lambda x: x.purchase_date())
         keyfunc = lambda x: x.investment.symbol
-        lots = sorted(lots, key=keyfunc)
+        lots.sort(key=keyfunc)
         return [cls(ls) for (investment, ls) in itertools.groupby(lots, key=keyfunc)]
 
 
