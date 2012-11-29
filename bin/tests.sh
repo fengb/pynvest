@@ -1,8 +1,9 @@
 #!/bin/bash
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $SCRIPT_DIR
-. __env__.sh
+export PYTHONPATH=$SCRIPT_DIR/..
+export PROJECT_DIR=$PYTHONPATH/dptest
+cd $PYTHONPATH
 
 
 mkdir -p test
