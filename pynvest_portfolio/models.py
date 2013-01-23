@@ -1,6 +1,8 @@
 from django.db import models
+import django
 import pynvest_investment
 import decimal
+import operator
 
 
 class Portfolio(models.Model):
@@ -8,6 +10,28 @@ class Portfolio(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.name
+
+    def sell(self, investment, date, shares, price):
+        lots = sorted(self.lot_set.filter(investment=investment),
+                      key=operator.methodcaller('purchase_date'))
+
+        if sum(l.outstanding_shares for l in lots) + shares < 0:
+            raise ValueError('Trying to sell %s shares but only have %s'
+                             % (-shares, total_shares))
+
+        with django.db.transaction.commit_on_success():
+            transactions = []
+            for lot in lots:
+                if lot.outstanding_shares <= 0:
+                    continue
+
+                transaction = Transaction.objects.create(lot=lot, date=date, price=price,
+                                                         shares=max(-lot.outstanding_shares, -shares))
+                transactions.append(transaction)
+                shares += transaction.shares
+                if shares <= 0:
+                    break
+            return transactions
 
 
 class Adjustment(models.Model):
