@@ -15,6 +15,13 @@ class Adjustment(models.Model):
     portfolio       = models.ForeignKey(Portfolio)
     date            = models.DateField(db_index=True)
     value           = models.DecimalField(max_digits=12, decimal_places=4)
+    reason          = models.CharField(max_length=3, choices=[
+                        ('div', 'dividend'),
+                        ('cst', 'capital gains short-term'),
+                        ('clt', 'capital gains long-term'),
+                        ('fee', 'fee'),
+                        ('tax', 'tax'),
+                      ])
 
     def __unicode__(self):
         return u'%s %s %s' % (self.investment, self.date, self.value)
