@@ -22,7 +22,9 @@ def PriceFinder(investment, start_date=None):
         search_start_date = investment.snapshot_set.filter(date__lte=start_date).latest('date').date
         filter_args['date__gte'] = search_start_date
 
-    items = list(investment.snapshot_set.filter(**filter_args).order_by('date').values_list('date', 'close'))
+    items = list(investment.snapshot_set.filter(**filter_args)
+                                        .order_by('date')
+                                        .values_list('date', 'close'))
 
     if start_date and items[0][0] != start_date:
         # hard cutoff at start_date
@@ -62,8 +64,8 @@ def BenchmarkGrowth(growth, investment):
     start_date = next(iter(growth))
     price_finder = PriceFinder(investment, start_date)
 
-    dividends = models.Snapshot.objects.filter(investment=investment, dividend__gt=0, date__gt=start_date
-                                      ).order_by('date')
+    dividends = (models.Dividend.objects.filter(investment=investment, date__gt=start_date)
+                                        .order_by('date'))
     dividends = collections.deque(dividends)
     cashflows = collections.deque(growth.cashflows())
     sum_shares = 0
@@ -75,7 +77,7 @@ def BenchmarkGrowth(growth, investment):
         else: # if dividends and (not cashflows or dividends[0].date < cashflows[0][0]):
             dividend = dividends.popleft()
             date = dividend.date
-            shares = sum_shares * dividend.dividend_percent()
+            shares = sum_shares * dividend.amount / price_finder[dividend.date]
             value = 0 # reinvested dividends are not from outside thus are not cash values
 
         sum_shares += shares
