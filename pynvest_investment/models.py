@@ -31,11 +31,11 @@ class Investment(models.Model):
         return u'%s' % (self.symbol)
 
     def current_price(self):
-        return self.snapshot_set.latest('date').close
+        return self.historicalprice_set.latest('date').close
 
     def _year_data(self, field):
         if not hasattr(self, '_year_data_cache'):
-            self._year_data_cache = self.snapshot_set.filter_year_range().aggregate(high=models.Max('high'), low=models.Min('low'))
+            self._year_data_cache = self.historicalprice_set.filter_year_range().aggregate(high=models.Max('high'), low=models.Min('low'))
         return self._year_data_cache[field]
 
     def year_high(self):
@@ -43,6 +43,10 @@ class Investment(models.Model):
 
     def year_low(self):
         return self._year_data('low')
+
+    @property
+    def snapshot_set(self):
+        return self.historicalprice_set.dividends().splits()
 
 
 class HistoricalPrice(models.Model):
@@ -65,8 +69,25 @@ class HistoricalPrice(models.Model):
             start_date = end_date - datetime.timedelta(days=365)
             return self.filter(date__lte=end_date, date__gte=start_date)
 
+        def dividends(self):
+            return self.extra(select={'dividend': '''
+                SELECT dividend.amount
+                  FROM %(dividend)s dividend
+                 WHERE dividend.date = %(self)s.date
+                   AND dividend.investment_id = %(self)s.investment_id
+            '''% {'self': self.model._meta.db_table, 'dividend': Dividend._meta.db_table}})
+
+        def splits(self):
+            return self.extra(select={'split': '''
+                SELECT split.before*1.0 / split.after
+                  FROM %(split)s split
+                 WHERE split.date = %(self)s.date
+                   AND split.investment_id = %(self)s.investment_id
+            '''% {'self': self.model._meta.db_table, 'split': Split._meta.db_table}})
+
         def close_adjusted(self):
-            aggr_func = 'SUM(LN(1.0 * close / (close + dividend) * split_before / split_after))'
+            # FIXME
+            aggr_func = 'SUM(LN(1.0 * close / (close + dividend) * COALESCE(split, 1)))'
             subquery = '''SELECT %(table)s.close * EXP(COALESCE(%(aggr_func)s, 0))
                             FROM %(table)s t
                            WHERE investment_id = %(table)s.investment_id
