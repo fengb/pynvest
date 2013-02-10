@@ -24,9 +24,9 @@ def snapshots(request, symbol, year):
     vars = {
         'title': investment.symbol,
         'investment': investment,
-        'snapshots': investment.snapshot_set.
-                                  filter(date__year=year).
-                                  order_by('-date'),
+        'snapshots': investment.snapshot_set
+                               .filter(date__year=year)
+                               .order_by('-date'),
     }
     vars['prev_year'] = year - 1 if investment.snapshot_set.filter(date__year=(year-1)).exists() else None
     vars['next_year'] = year + 1 if year < current_year() else None
