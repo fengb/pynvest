@@ -45,27 +45,18 @@ class Investment(models.Model):
         return self._year_data('low')
 
 
-class Snapshot(models.Model):
+class HistoricalPrice(models.Model):
     investment      = models.ForeignKey(Investment)
     date            = models.DateField(db_index=True)
     high            = models.DecimalField(max_digits=12, decimal_places=4)
     low             = models.DecimalField(max_digits=12, decimal_places=4)
     close           = models.DecimalField(max_digits=12, decimal_places=4)
-    dividend        = models.DecimalField(max_digits=10, decimal_places=4, default=0)
-    split_before    = models.IntegerField(default=1)
-    split_after     = models.IntegerField(default=1)
 
     class Meta:
         unique_together = [('investment', 'date')]
 
     def dividend_percent(self):
         return self.dividend / self.close
-
-    def split(self):
-        if self.split_before == 1 and self.split_after == 1:
-            return ''
-
-        return '%d:%d' % (self.split_after, self.split_before)
 
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
@@ -83,3 +74,25 @@ class Snapshot(models.Model):
                              AND date > %(table)s.date
                        ''' % {'table': self.model._meta.db_table, 'aggr_func': aggr_func}
             return self.extra(select={'close_adjusted': subquery})
+
+
+class Dividend(models.Model):
+    investment      = models.ForeignKey(Investment)
+    date            = models.DateField(db_index=True)
+    amount          = models.DecimalField(max_digits=10, decimal_places=4)
+
+    class Meta:
+        unique_together = [('investment', 'date')]
+
+
+class Split(models.Model):
+    investment      = models.ForeignKey(Investment)
+    date            = models.DateField(db_index=True)
+    before          = models.IntegerField()
+    after           = models.IntegerField()
+
+    class Meta:
+        unique_together = [('investment', 'date')]
+
+    def __unicode__(self):
+        return '%d:%d' % (self.after, self.before)

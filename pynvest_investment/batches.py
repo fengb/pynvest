@@ -7,56 +7,56 @@ import os
 
 
 def _populate_prices(investment, fix_existing):
-    all_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
+    historicalprices = dict((historicalprice.date, historicalprice) for historicalprice in investment.historicalprice_set.all())
     dirty_dates = set()
     for row in pynvest_connect.historical_prices(investment.symbol):
-        snapshot = all_snapshots.setdefault(row.date, models.Snapshot(investment=investment, date=row.date))
-        if (snapshot.high  == row.high and
-            snapshot.low   == row.low and
-            snapshot.close == row.close):
+        historicalprice = historicalprices.setdefault(row.date, models.HistoricalPrice(investment=investment, date=row.date))
+        if (historicalprice.high  == row.high and
+            historicalprice.low   == row.low and
+            historicalprice.close == row.close):
             if fix_existing:
                 continue
             else:
                 break
 
-        snapshot.high = row.high
-        snapshot.low = row.low
-        snapshot.close = row.close
-        snapshot.save()
-        dirty_dates.add(snapshot.date)
+        historicalprice.high = row.high
+        historicalprice.low = row.low
+        historicalprice.close = row.close
+        historicalprice.save()
+        dirty_dates.add(row.date)
     return dirty_dates
 
 def _populate_dividends(investment, fix_existing):
-    all_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
+    dividends = dict((dividend.date, dividend) for dividend in investment.dividend_set.all())
     dirty_dates = set()
-    for dividend in pynvest_connect.dividends(investment.symbol):
-        snapshot = all_snapshots[dividend.date]
-        if snapshot.dividend == dividend.amount:
+    for row in pynvest_connect.dividends(investment.symbol):
+        dividend = dividends.setdefault(row.date, models.Dividend(investment=investment, date=row.date))
+        if dividend.amount == row.amount:
             if fix_existing:
                 continue
             else:
                 break
 
-        snapshot.dividend = dividend.amount
-        snapshot.save()
-        dirty_dates.add(snapshot.date)
+        dividend.amount = row.amount
+        dividend.save()
+        dirty_dates.add(row.date)
     return dirty_dates
 
 def _populate_splits(investment, fix_existing):
-    all_snapshots = dict((snapshot.date, snapshot) for snapshot in investment.snapshot_set.all())
+    splits = dict((split.date, split) for split in investment.split_set.all())
     dirty_dates = set()
-    for split in pynvest_connect.splits(investment.symbol):
-        snapshot = all_snapshots[split.date]
-        if snapshot.split_before == split.before and snapshot.split_after == split.after:
+    for row in pynvest_connect.splits(investment.symbol):
+        split = splits.setdefault(row.date, models.Split(investment=investment, date=row.date))
+        if split.before == row.before and split.after == row.after:
             if fix_existing:
                 continue
             else:
                 break
 
-        snapshot.split_before = split.before
-        snapshot.split_after = split.after
-        snapshot.save()
-        dirty_dates.add(snapshot.date)
+        split.before = row.before
+        split.after = row.after
+        split.save()
+        dirty_dates.add(row.date)
     return dirty_dates
 
 
