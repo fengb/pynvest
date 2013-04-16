@@ -4,10 +4,10 @@
 
 {% block content %}
   {% if prev_year %}
-    <a href='{% url pynvest_investment.views.snapshots investment.symbol prev_year %}'>&lt; {{ prev_year }}</a>
+    <a href='{% url 'pynvest_investment.views.snapshots' investment.symbol prev_year %}'>&lt; {{ prev_year }}</a>
   {% endif %}
   {% if next_year %}
-    <a href='{% url pynvest_investment.views.snapshots investment.symbol next_year %}'>{{ next_year }} &gt;</a>
+    <a href='{% url 'pynvest_investment.views.snapshots' investment.symbol next_year %}'>{{ next_year }} &gt;</a>
   {% endif %}
 
   <table>
@@ -41,9 +41,9 @@
   </table>
 
   {% if prev_year %}
-    <a href='{% url pynvest_investment.views.snapshots investment.symbol prev_year %}'>&lt; {{ prev_year }}</a>
+    <a href='{% url 'pynvest_investment.views.snapshots' investment.symbol prev_year %}'>&lt; {{ prev_year }}</a>
   {% endif %}
   {% if next_year %}
-    <a href='{% url pynvest_investment.views.snapshots investment.symbol next_year %}'>{{ next_year }} &gt;</a>
+    <a href='{% url 'pynvest_investment.views.snapshots' investment.symbol next_year %}'>{{ next_year }} &gt;</a>
   {% endif %}
 {% endblock content %}

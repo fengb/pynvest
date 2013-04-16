@@ -12,7 +12,7 @@
 
     <dt>Price</dt>
     <dd>{{ investment.current_price|floatformat:2 }}
-        (<a href='{% url pynvest_investment.views.snapshots investment.symbol year %}'>historical prices</a>)</dd>
+        (<a href='{% url 'pynvest_investment.views.snapshots' investment.symbol year %}'>historical prices</a>)</dd>
 
     <dt>52 week range</dt>
     <dd>{{ investment.year_low|floatformat:2 }} - {{ investment.year_high|floatformat:2 }}</dd>
