@@ -24,7 +24,12 @@ def historical_prices(*args, **kwargs):
 
 
 def dividends(*args, **kwargs):
-    return module(kwargs).dividends(*args, **kwargs)
+    # FIXME: this should be non-adjusted
+    return module(kwargs).adjusted_dividends(*args, **kwargs)
+
+
+def dividends(*args, **kwargs):
+    return module(kwargs).adjusted_dividends(*args, **kwargs)
 
 
 def splits(*args, **kwargs):

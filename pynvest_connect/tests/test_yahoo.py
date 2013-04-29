@@ -35,17 +35,15 @@ class TestHistoricalPrices(object):
         assert prices[0].close * 100 == 7954
 
 
-class TestDividends(object):
-    @pytest.mark.xfail
-    # Yahoo has adjusted dividends
+class TestAdjustedDividends(object):
     def test_single_dividend(self):
-        dividends = pynvest_connect.yahoo.dividends('KO', start_date=datetime.date(2012, 3, 13), end_date=datetime.date(2012, 3, 13))
+        dividends = pynvest_connect.yahoo.adjusted_dividends('KO', start_date=datetime.date(2012, 3, 13), end_date=datetime.date(2012, 3, 13))
 
         assert len(dividends) == 1
-        assert dividends[0].amount * 100 == 51
+        assert dividends[0].amount * 100 == 25.5
 
     def test_multiple_dividends_in_reverse_order(self):
-        dividends = pynvest_connect.yahoo.dividends('KO', start_date=datetime.date(2012, 3, 13), end_date=datetime.date(2012, 6, 13))
+        dividends = pynvest_connect.yahoo.adjusted_dividends('KO', start_date=datetime.date(2012, 3, 13), end_date=datetime.date(2012, 6, 13))
 
         assert len(dividends) == 2
         assert dividends[0].date == datetime.date(2012, 6, 13)
