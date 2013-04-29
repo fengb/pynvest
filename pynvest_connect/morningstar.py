@@ -8,7 +8,7 @@ import decimal
 
 def convert_string(string):
     if '/' in string:
-        return datetime.datetime.strptime(string, '%M/%d/%Y')
+        return datetime.datetime.strptime(string, '%m/%d/%Y').date()
     else:
         try:
             return decimal.Decimal(string.replace(',', ''))
@@ -21,9 +21,9 @@ def historical_prices(symbol, start_date=None, end_date=None):
     params = ['t=%s' % symbol, 'freq=d']
     if start_date:
         params.append('pd=custom')
-        params.append(start_date.strftime('sd=%M/%d/%Y'))
+        params.append(start_date.strftime('sd=%m/%d/%Y'))
         if end_date:
-            params.append(start_date.strftime('startdate=%M/%d/%Y'))
+            params.append(end_date.strftime('ed=%m/%d/%Y'))
     else:
         params.append('pd=max')
 
