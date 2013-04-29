@@ -1,36 +1,25 @@
 from . import yahoo, google, morningstar
 
 
-class ApiNotFound(Exception): pass
+_MODULES = [yahoo, google, morningstar]
 
-_MODULES = {
-  'yahoo': yahoo,
-  'google': google,
-  'morningstar': morningstar,
-  '_default': yahoo,  # FIXME: replace Yahoo with a better public API
-}
+def _invoke(funcname, *args, **kwargs):
+    for module in _MODULES:
+        if hasattr(module, funcname):
+            func = getattr(module, funcname)
+            return func(*args, **kwargs)
 
-def module(kwargs):
-    api = kwargs.pop('api', '_default')
-
-    try:
-        return _MODULES[api]
-    except KeyError:
-        raise ApiNotFound(api)
+    raise AttributeError('Cannot resolve "%s"' % funcname)
 
 
 def historical_prices(*args, **kwargs):
-    return module(kwargs).historical_prices(*args, **kwargs)
+    return _invoke('historical_prices', *args, **kwargs)
 
-
-def dividends(*args, **kwargs):
-    # FIXME: this should be non-adjusted
-    return module(kwargs).adjusted_dividends(*args, **kwargs)
-
-
-def dividends(*args, **kwargs):
-    return module(kwargs).adjusted_dividends(*args, **kwargs)
-
+def adjusted_dividends(*args, **kwargs):
+    return _invoke('adjusted_dividends', *args, **kwargs)
 
 def splits(*args, **kwargs):
-    return module(kwargs).splits(*args, **kwargs)
+    return _invoke('splits', *args, **kwargs)
+
+# FIXME: this should be non-adjusted
+dividends = adjusted_dividends
