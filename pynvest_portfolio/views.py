@@ -12,7 +12,9 @@ def list(request):
 
 def summary(request, id):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    lots = models.Lot.objects.filter(portfolio=portfolio).exclude(outstanding_shares=0)
+    # FIXME: django<->sqlite3 bug https://code.djangoproject.com/ticket/18247
+    #lots = [models.Lot.objects.filter(portfolio=portfolio).exclude(outstanding_shares=0)]
+    lots = [l for l in models.Lot.objects.filter(portfolio=portfolio) if l.outstanding_shares != 0]
     return render_to_response('pynvest_portfolio/summary_table.html', {
         'title': portfolio.name,
         'lot_summarys': presenters.LotSummary.group_by_investment(lots),
