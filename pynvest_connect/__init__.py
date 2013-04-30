@@ -1,7 +1,7 @@
-from . import yahoo, google, morningstar
+from . import cash, yahoo, google, morningstar
 
 
-_MODULES = [yahoo, google, morningstar]
+_MODULES = [yahoo, google, morningstar, cash]
 
 def _invoke(funcname, *args, **kwargs):
     jurisdiction = kwargs.pop('jurisdiction', None)
