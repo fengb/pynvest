@@ -5,6 +5,9 @@ import datetime
 import decimal
 
 
+SUPPORTED_JURISDICTIONS = set(['SEC'])
+
+
 def convert_string(field, strptime_string=None, strptime_cache={}):
     if '-' in field:
         return datetime.date(*map(int, field.split('-')))

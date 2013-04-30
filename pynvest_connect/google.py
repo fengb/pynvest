@@ -6,6 +6,9 @@ import datetime
 import decimal
 
 
+SUPPORTED_JURISDICTIONS = set(['SEC'])
+
+
 def convert_string(string):
     if '-' in string:
         return datetime.datetime.strptime(string, '%d-%b-%y').date()
