@@ -114,6 +114,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'pynvest_investment',
     'pynvest_portfolio',
+    'pynvest_ownership',
 )
 
 # A sample logging configuration. The only tangible logging
