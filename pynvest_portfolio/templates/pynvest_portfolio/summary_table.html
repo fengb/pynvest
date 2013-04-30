@@ -19,7 +19,7 @@
     {% for lot_summary in lot_summarys %}
       <tbody>
         <tr class='summary'>
-          <th class='investment'><a href='{% url pynvest_investment.views.summary lot_summary.investment.symbol %}'>{{ lot_summary.investment }}</a></th>
+          <th class='investment'><a href='{% url 'pynvest_investment.views.summary' lot_summary.investment.symbol %}'>{{ lot_summary.investment }}</a></th>
           <td class='outstanding shares'>{{ lot_summary.outstanding_shares|floatformat:4 }}</td>
           <td class='purchase date'>{{ lot_summary.purchase_date|default:'' }}</td>
           <td class='purchase price'>{{ lot_summary.purchase_price|floatformat:4 }}</td>
