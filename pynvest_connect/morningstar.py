@@ -17,7 +17,7 @@ def convert_string(string):
 
 
 _DIRECTIVES_PATTERN = re.compile('[\W_]+')
-def historical_prices(symbol, start_date=None, end_date=None):
+def adjusted_historical_prices(symbol, start_date=None, end_date=None):
     params = ['t=%s' % symbol, 'freq=d']
     if start_date:
         params.append('pd=custom')
