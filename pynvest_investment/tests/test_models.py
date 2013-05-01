@@ -16,9 +16,9 @@ class TestSnapshot(object):
     class TestCloseAdjusted(object):
         def setup(self):
             self.models = []
-            exchange = models.Exchange.objects.create(symbol='a', name='b')
-            self.investment = models.Investment.objects.create(exchange=exchange, symbol='c', name='d')
-            self.models.append(exchange)
+            jurisdiction = models.Jurisdiction.objects.create(symbol='a', name='b')
+            self.investment = models.Investment.objects.create(jurisdiction=jurisdiction, symbol='c', name='d')
+            self.models.append(jurisdiction)
             self.models.append(self.investment)
 
         def teardown(self):

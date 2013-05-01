@@ -3,6 +3,11 @@ from . import cash, yahoo, google, morningstar
 
 _MODULES = [yahoo, google, morningstar, cash]
 
+
+class CallNotSupportedException(Exception):
+    pass
+
+
 def _invoke(funcname, *args, **kwargs):
     jurisdiction = kwargs.pop('jurisdiction', None)
 
@@ -13,9 +18,9 @@ def _invoke(funcname, *args, **kwargs):
             return func(*args, **kwargs)
 
     if jurisdiction:
-        raise AttributeError('Cannot resolve "%s" for "%s"' % (funcname, jurisdiction))
+        raise CallNotSupportedException('Cannot resolve "%s" for "%s"' % (funcname, jurisdiction))
     else:
-        raise AttributeError('Cannot resolve "%s"' % funcname)
+        raise CallNotSupportedException('Cannot resolve "%s"' % funcname)
 
 
 def historical_prices(*args, **kwargs):

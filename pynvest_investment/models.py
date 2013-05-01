@@ -23,7 +23,7 @@ class Jurisdiction(models.Model):
 
 
 class Investment(models.Model):
-    exchange        = models.ForeignKey(Exchange)
+    jurisdiction    = models.ForeignKey(Jurisdiction)
     symbol          = models.CharField(max_length=10, unique=True)
     name            = models.CharField(max_length=200)
 
