@@ -1,31 +1,36 @@
-from . import yahoo, google, morningstar
+from . import cash, yahoo, google, morningstar
 
 
-class ApiNotFound(Exception): pass
+_MODULES = [yahoo, google, morningstar, cash]
 
-_MODULES = {
-  'yahoo': yahoo,
-  'google': google,
-  'morningstar': morningstar,
-  '_default': yahoo,  # FIXME: replace Yahoo with a better public API
-}
 
-def module(kwargs):
-    api = kwargs.pop('api', '_default')
+class CallNotSupportedException(Exception):
+    pass
 
-    try:
-        return _MODULES[api]
-    except KeyError:
-        raise ApiNotFound(api)
+
+def _invoke(funcname, *args, **kwargs):
+    jurisdiction = kwargs.pop('jurisdiction', None)
+
+    for module in _MODULES:
+        if hasattr(module, funcname) and\
+           (jurisdiction is None or jurisdiction in module.SUPPORTED_JURISDICTIONS):
+            func = getattr(module, funcname)
+            return func(*args, **kwargs)
+
+    if jurisdiction:
+        raise CallNotSupportedException('Cannot resolve "%s" for "%s"' % (funcname, jurisdiction))
+    else:
+        raise CallNotSupportedException('Cannot resolve "%s"' % funcname)
 
 
 def historical_prices(*args, **kwargs):
-    return module(kwargs).historical_prices(*args, **kwargs)
+    return _invoke('historical_prices', *args, **kwargs)
 
-
-def dividends(*args, **kwargs):
-    return module(kwargs).dividends(*args, **kwargs)
-
+def adjusted_dividends(*args, **kwargs):
+    return _invoke('adjusted_dividends', *args, **kwargs)
 
 def splits(*args, **kwargs):
-    return module(kwargs).splits(*args, **kwargs)
+    return _invoke('splits', *args, **kwargs)
+
+# FIXME: this should be non-adjusted
+dividends = adjusted_dividends

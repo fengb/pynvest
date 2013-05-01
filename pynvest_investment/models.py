@@ -14,7 +14,7 @@ def add_sqlite_math_functions(connection, **kwargs):
     connection.connection.create_function('exp', 1, math.exp)
 
 
-class Exchange(models.Model):
+class Jurisdiction(models.Model):
     symbol          = models.CharField(max_length=10, unique=True)
     name            = models.CharField(max_length=200)
 
@@ -23,7 +23,7 @@ class Exchange(models.Model):
 
 
 class Investment(models.Model):
-    exchange        = models.ForeignKey(Exchange)
+    jurisdiction    = models.ForeignKey(Jurisdiction)
     symbol          = models.CharField(max_length=10, unique=True)
     name            = models.CharField(max_length=200)
 

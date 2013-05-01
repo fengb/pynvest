@@ -6,20 +6,23 @@ import datetime
 import decimal
 
 
+SUPPORTED_JURISDICTIONS = set(['SEC'])
+
+
 def convert_string(string):
     if '-' in string:
-        return datetime.datetime.strptime(string, '%d-%b-%y')
+        return datetime.datetime.strptime(string, '%d-%b-%y').date()
     else:
         return decimal.Decimal(string)
 
 
 _DIRECTIVES_PATTERN = re.compile('[\W_]+')
-def historical_prices(symbol, start_date=None, end_date=None):
+def adjusted_historical_prices(symbol, start_date=None, end_date=None):
     params = ['q=%s' % symbol, 'output=csv']
     if start_date:
         params.append(start_date.strftime('startdate=%b+%d,+%Y'))
     if end_date:
-        params.append(start_date.strftime('enddate=%b+%d,+%Y'))
+        params.append(end_date.strftime('enddate=%b+%d,+%Y'))
 
     response = urllib2.urlopen('http://www.google.com/finance/historical?' + '&'.join(params))
     try:

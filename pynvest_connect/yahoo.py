@@ -5,6 +5,9 @@ import datetime
 import decimal
 
 
+SUPPORTED_JURISDICTIONS = set(['SEC'])
+
+
 def convert_string(field, strptime_string=None, strptime_cache={}):
     if '-' in field:
         return datetime.date(*map(int, field.split('-')))
@@ -44,7 +47,7 @@ def historical_prices(symbol, start_date=None, end_date=None):
 
 
 _DIVIDENDS_TUPLE = collections.namedtuple('Dividend', 'date amount')
-def dividends(symbol, start_date=None, end_date=None):
+def adjusted_dividends(symbol, start_date=None, end_date=None):
     response = _ichart_request(symbol, start_date, end_date, extra_params=['g=v'])
     try:
         raw = csv.reader(response)
