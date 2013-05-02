@@ -18,5 +18,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^investment/', include('pynvest_investment.urls')),
     url(r'^portfolio/', include('pynvest_portfolio.urls')),
-    url(r'^portfolio1/', include(pynvest_portfolio.urls.portfolio(1))),
+    url(r'^p1/', include(pynvest_portfolio.urls.portfolio(1))),
 )
