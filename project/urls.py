@@ -1,5 +1,7 @@
 from django.conf.urls.defaults import patterns, include, url
 
+import pynvest_portfolio
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -16,4 +18,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^investment/', include('pynvest_investment.urls')),
     url(r'^portfolio/', include('pynvest_portfolio.urls')),
+    url(r'^portfolio1/', include(pynvest_portfolio.urls.portfolio(1))),
 )
