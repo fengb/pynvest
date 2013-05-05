@@ -26,11 +26,11 @@ def _invoke(funcname, *args, **kwargs):
 def historical_prices(*args, **kwargs):
     return _invoke('historical_prices', *args, **kwargs)
 
+def dividends(*args, **kwargs):
+    return _invoke('dividends', *args, **kwargs)
+
 def adjusted_dividends(*args, **kwargs):
     return _invoke('adjusted_dividends', *args, **kwargs)
 
 def splits(*args, **kwargs):
     return _invoke('splits', *args, **kwargs)
-
-# FIXME: this should be non-adjusted
-dividends = adjusted_dividends
