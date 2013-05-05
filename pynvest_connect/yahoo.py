@@ -47,7 +47,8 @@ def historical_prices(symbol, start_date=None, end_date=None):
 
 
 _DIVIDENDS_TUPLE = collections.namedtuple('Dividend', 'date amount')
-def dividends(symbol, start_date=None, end_date=None):
+_SPLITS_TUPLE = collections.namedtuple('Split', 'date before after')
+def _splits_dividends(symbol, start_date=None, end_date=None):
     # Yahoo dividends are split adjusted so we have to unadjust them manually
     end_date = end_date or datetime.date.today()
 
@@ -57,10 +58,10 @@ def dividends(symbol, start_date=None, end_date=None):
         raw = csv.reader(response)
 
         next(raw) # remove directives row. Useless AND wrong this time!
+        splits = []
         dividends = []
         before_adjust = decimal.Decimal(1)
         after_adjust = decimal.Decimal(1)
-        adjust = 1
         for row in raw:
             if row[0].lower() == 'split':
                 type, date, value = row
@@ -71,19 +72,26 @@ def dividends(symbol, start_date=None, end_date=None):
                 after, before = map(int, value.split(':'))
                 before_adjust *= before
                 after_adjust *= after
-                adjust = after_adjust / before_adjust
+                if date <= end_date:
+                    splits.append(_SPLITS_TUPLE(date, before, after))
             elif row[0].lower() == 'dividend':
                 type, date, value = row
                 # Can't use convert_string because date is in a different format...
                 date = datetime.datetime.strptime(date.strip(), '%Y%m%d').date()
 
-                if date > end_date:
-                    continue
-
-                dividends.append(_DIVIDENDS_TUPLE(date, decimal.Decimal(value) * adjust))
-        return dividends
+                if date <= end_date:
+                    dividends.append(_DIVIDENDS_TUPLE(date, decimal.Decimal(value) * after_adjust / before_adjust))
+        return splits, dividends
     finally:
         response.close()
+
+
+def dividends(*args, **kwargs):
+    return _splits_dividends(*args, **kwargs)[1]
+
+
+def splits(*args, **kwargs):
+    return _splits_dividends(*args, **kwargs)[0]
 
 
 def adjusted_dividends(symbol, start_date=None, end_date=None):
@@ -93,29 +101,6 @@ def adjusted_dividends(symbol, start_date=None, end_date=None):
 
         next(raw) # remove directives row
         return [_DIVIDENDS_TUPLE(*map(convert_string, row)) for row in raw]
-    finally:
-        response.close()
-
-
-_SPLITS_TUPLE = collections.namedtuple('Split', 'date before after')
-def splits(symbol, start_date=None, end_date=None):
-    # What the hell is 'x'?  I really hate Yahoo API...
-    response = _ichart_request(symbol, start_date, end_date, extra_params=['g=v'], resource='x')
-    try:
-        raw = csv.reader(response)
-
-        next(raw) # remove directives row. Useless AND wrong this time!
-        splits = []
-        for row in raw:
-            if row[0].lower() != 'split':
-                continue
-            type, date, value = row
-            # Can't use convert_string because date is in a different format...
-            date = datetime.datetime.strptime(date.strip(), '%Y%m%d').date()
-            # Split 2:1 means 1 share turns into 2
-            after, before = map(int, value.split(':'))
-            splits.append(_SPLITS_TUPLE(date, before, after))
-        return splits
     finally:
         response.close()
 

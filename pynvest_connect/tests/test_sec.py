@@ -83,3 +83,23 @@ class TestAdjustedDividends(object):
         assert len(dividends) == 2
         assert dividends[0].date == datetime.date(2012, 6, 13)
         assert dividends[1].date == datetime.date(2012, 3, 13)
+
+
+class TestSplits(object):
+    func = 'splits'
+
+    def test_single_split(self, module):
+        splits = module.splits('KO', start_date=datetime.date(2012, 8, 13),
+                                     end_date=datetime.date(2012, 8, 13))
+
+        assert len(splits) == 1
+        assert splits[0].before == 1
+        assert splits[0].after == 2
+
+    def test_multiple_splits_in_reverse_order(self, module):
+        splits = module.splits('KO', start_date=datetime.date(1996, 5, 13),
+                                     end_date=datetime.date(2012, 8, 13))
+
+        assert len(splits) == 2
+        assert splits[0].date == datetime.date(2012, 8, 13)
+        assert splits[1].date == datetime.date(1996, 5, 13)
