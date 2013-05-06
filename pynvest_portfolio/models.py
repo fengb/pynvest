@@ -34,23 +34,6 @@ class Portfolio(models.Model):
             return transactions
 
 
-class Adjustment(models.Model):
-    investment      = models.ForeignKey(pynvest_investment.models.Investment)
-    portfolio       = models.ForeignKey(Portfolio)
-    date            = models.DateField(db_index=True)
-    value           = models.DecimalField(max_digits=12, decimal_places=4)
-    reason          = models.CharField(max_length=3, choices=[
-                        ('div', 'dividend'),
-                        ('cst', 'capital gains short-term'),
-                        ('clt', 'capital gains long-term'),
-                        ('fee', 'fee'),
-                        ('tax', 'tax'),
-                      ])
-
-    def __unicode__(self):
-        return u'%s %s %s' % (self.investment, self.date, self.value)
-
-
 class Lot(models.Model):
     investment      = models.ForeignKey(pynvest_investment.models.Investment)
     portfolio       = models.ForeignKey(Portfolio)
@@ -110,3 +93,18 @@ class Transaction(models.Model):
 
     def realized_gain(self):
         return -self.shares * (self.price - self.base_transaction().price)
+
+
+class Adjustment(models.Model):
+    investment      = models.ForeignKey(pynvest_investment.models.Investment)
+    transaction     = models.ForeignKey(Transaction)
+    reason          = models.CharField(max_length=3, choices=[
+                        ('div', 'dividend'),
+                        ('cst', 'capital gains short-term'),
+                        ('clt', 'capital gains long-term'),
+                        ('fee', 'fee'),
+                        ('tax', 'tax'),
+                      ])
+
+    def __unicode__(self):
+        return u'%s %s' % (self.reason, self.transaction)
