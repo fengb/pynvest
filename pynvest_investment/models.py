@@ -15,17 +15,17 @@ def add_sqlite_math_functions(connection, **kwargs):
 
 
 class Jurisdiction(models.Model):
-    symbol          = models.CharField(max_length=10, unique=True)
-    name            = models.CharField(max_length=200)
+    symbol = models.CharField(max_length=10, unique=True)
+    name   = models.CharField(max_length=200)
 
     def __unicode__(self):
         return u'%s' % self.symbol
 
 
 class Investment(models.Model):
-    jurisdiction    = models.ForeignKey(Jurisdiction)
-    symbol          = models.CharField(max_length=10, unique=True)
-    name            = models.CharField(max_length=200)
+    jurisdiction = models.ForeignKey(Jurisdiction)
+    symbol       = models.CharField(max_length=10, unique=True)
+    name         = models.CharField(max_length=200)
 
     def __unicode__(self):
         return u'%s' % (self.symbol)
@@ -50,11 +50,11 @@ class Investment(models.Model):
 
 
 class HistoricalPrice(models.Model):
-    investment      = models.ForeignKey(Investment)
-    date            = models.DateField(db_index=True)
-    high            = models.DecimalField(max_digits=12, decimal_places=4)
-    low             = models.DecimalField(max_digits=12, decimal_places=4)
-    close           = models.DecimalField(max_digits=12, decimal_places=4)
+    investment = models.ForeignKey(Investment)
+    date       = models.DateField(db_index=True)
+    high       = models.DecimalField(max_digits=12, decimal_places=4)
+    low        = models.DecimalField(max_digits=12, decimal_places=4)
+    close      = models.DecimalField(max_digits=12, decimal_places=4)
 
     class Meta:
         unique_together = [('investment', 'date')]
@@ -98,19 +98,19 @@ class HistoricalPrice(models.Model):
 
 
 class Dividend(models.Model):
-    investment      = models.ForeignKey(Investment)
-    date            = models.DateField(db_index=True)
-    amount          = models.DecimalField(max_digits=10, decimal_places=4)
+    investment = models.ForeignKey(Investment)
+    date       = models.DateField(db_index=True)
+    amount     = models.DecimalField(max_digits=10, decimal_places=4)
 
     class Meta:
         unique_together = [('investment', 'date')]
 
 
 class Split(models.Model):
-    investment      = models.ForeignKey(Investment)
-    date            = models.DateField(db_index=True)
-    before          = models.IntegerField()
-    after           = models.IntegerField()
+    investment = models.ForeignKey(Investment)
+    date       = models.DateField(db_index=True)
+    before     = models.IntegerField()
+    after      = models.IntegerField()
 
     class Meta:
         unique_together = [('investment', 'date')]

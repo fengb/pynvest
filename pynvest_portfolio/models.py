@@ -6,7 +6,7 @@ import operator
 
 
 class Portfolio(models.Model):
-    name            = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
 
     def __unicode__(self):
         return u'%s' % self.name
@@ -35,8 +35,8 @@ class Portfolio(models.Model):
 
 
 class Lot(models.Model):
-    investment      = models.ForeignKey(pynvest_investment.models.Investment)
-    portfolio       = models.ForeignKey(Portfolio)
+    investment = models.ForeignKey(pynvest_investment.models.Investment)
+    portfolio  = models.ForeignKey(Portfolio)
 
     def __unicode__(self):
         return u'%s %s' % (self.investment, self.portfolio)
@@ -73,10 +73,10 @@ class Lot(models.Model):
 
 
 class Transaction(models.Model):
-    lot             = models.ForeignKey(Lot)
-    date            = models.DateField()
-    shares          = models.DecimalField(max_digits=15, decimal_places=4)
-    price           = models.DecimalField(max_digits=12, decimal_places=4)
+    lot    = models.ForeignKey(Lot)
+    date   = models.DateField()
+    shares = models.DecimalField(max_digits=15, decimal_places=4)
+    price  = models.DecimalField(max_digits=12, decimal_places=4)
 
     def __unicode__(self):
         return u'%s %s %s' % (self.investment, self.date, self.value())
@@ -96,9 +96,9 @@ class Transaction(models.Model):
 
 
 class Adjustment(models.Model):
-    investment      = models.ForeignKey(pynvest_investment.models.Investment)
-    transaction     = models.ForeignKey(Transaction)
-    reason          = models.CharField(max_length=3, choices=[
+    investment  = models.ForeignKey(pynvest_investment.models.Investment)
+    transaction = models.ForeignKey(Transaction)
+    reason      = models.CharField(max_length=3, choices=[
                         ('div', 'dividend'),
                         ('cst', 'capital gains short-term'),
                         ('clt', 'capital gains long-term'),
