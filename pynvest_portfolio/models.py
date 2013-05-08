@@ -108,3 +108,9 @@ class Adjustment(models.Model):
 
     def __unicode__(self):
         return u'%s %s' % (self.reason, self.transaction)
+
+    def date(self):
+        return self.transaction.date
+
+    def value(self):
+        return self.transaction.value()

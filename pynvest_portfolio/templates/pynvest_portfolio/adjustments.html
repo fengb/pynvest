@@ -9,6 +9,7 @@
         <th>Investment</th>
         <th>Date</th>
         <th>Value</th>
+        <th>Reason</th>
       </tr>
     </thead>
     {% for adjustment in adjustments %}
@@ -17,6 +18,7 @@
           <th>{{ adjustment.investment }}</th>
           <td>{{ adjustment.date }}</td>
           <td>{{ adjustment.value|floatformat:'4' }}</td>
+          <td>{{ adjustment.reason }}</td>
         </tr>
       </tbody>
     {% endfor %}

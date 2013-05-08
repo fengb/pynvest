@@ -70,8 +70,8 @@ def transactions(request, id, year=None):
 
 def adjustments(request, id, year=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
-    adjustments = models.Adjustment.objects.filter(portfolio=portfolio
-                                          ).order_by('date', 'investment')
+    adjustments = models.Adjustment.objects.filter(transaction__lot__portfolio=portfolio
+                                                  ).order_by('transaction__date', 'investment')
     if year:
         transactions = transactions.filter(date__year=year)
 

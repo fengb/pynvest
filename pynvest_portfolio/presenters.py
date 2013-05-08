@@ -70,12 +70,8 @@ class LotSummary(object):
 
 def PortfolioInvestmentGrowth(portfolio, investment):
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
-    adjustments = models.Adjustment.objects.filter(portfolio=portfolio, investment=investment)
 
     entries = [(transaction.date, transaction.shares, transaction.value()) for transaction in transactions]
-    # Adjustment should be counted as reverse cashflow.
-    # Example: automatic reinvestment buys $10.  Need to adjust it by -$10.
-    entries.extend((adjustment.date, 0, -adjustment.value) for adjustment in adjustments)
 
     price_finder = pynvest_investment.presenters.PriceFinder(investment, min(entry[0] for entry in entries))
     return pynvest_investment.presenters.FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
