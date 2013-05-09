@@ -104,7 +104,9 @@ class Adjustment(models.Model):
                         ('clt', 'capital gains long-term'),
                         ('fee', 'fee'),
                         ('tax', 'tax'),
+                        ('exp', 'expense'),
                       ])
+    memo        = models.CharField(max_length=200, blank=True)
 
     def __unicode__(self):
         return u'%s %s' % (self.reason, self.transaction)
