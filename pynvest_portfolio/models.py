@@ -97,7 +97,7 @@ class Transaction(models.Model):
 
 class Adjustment(models.Model):
     investment  = models.ForeignKey(pynvest_investment.models.Investment)
-    transaction = models.ForeignKey(Transaction)
+    transaction = models.OneToOneField(Transaction)
     reason      = models.CharField(max_length=3, choices=[
                         ('div', 'dividend'),
                         ('cst', 'capital gains short-term'),
