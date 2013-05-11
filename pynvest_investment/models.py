@@ -98,22 +98,16 @@ class HistoricalPrice(models.Model):
 
 
 class Dividend(models.Model):
-    investment = models.ForeignKey(Investment)
-    date       = models.DateField(db_index=True)
-    amount     = models.DecimalField(max_digits=10, decimal_places=4)
+    historicalprice = models.OneToOneField(HistoricalPrice)
+    amount          = models.DecimalField(max_digits=12, decimal_places=4)
 
-    class Meta:
-        unique_together = [('investment', 'date')]
-
+    def __unicode__(self):
+        return '%s' % amount
 
 class Split(models.Model):
-    investment = models.ForeignKey(Investment)
-    date       = models.DateField(db_index=True)
-    before     = models.IntegerField()
-    after      = models.IntegerField()
-
-    class Meta:
-        unique_together = [('investment', 'date')]
+    historicalprice = models.OneToOneField(HistoricalPrice)
+    before          = models.IntegerField()
+    after           = models.IntegerField()
 
     def __unicode__(self):
         return '%d:%d' % (self.after, self.before)

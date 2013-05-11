@@ -6,8 +6,7 @@ from . import models
 import os
 
 
-def _populate_prices(investment, fix_existing):
-    historicalprices = dict((historicalprice.date, historicalprice) for historicalprice in investment.historicalprice_set.all())
+def _populate_prices(investment, fix_existing, historicalprices):
     dirty_dates = set()
     for row in pynvest_connect.historical_prices(investment.symbol, jurisdiction=investment.jurisdiction.symbol):
         historicalprice = historicalprices.setdefault(row.date, models.HistoricalPrice(investment=investment, date=row.date))
@@ -26,11 +25,13 @@ def _populate_prices(investment, fix_existing):
         dirty_dates.add(row.date)
     return dirty_dates
 
-def _populate_dividends(investment, fix_existing):
-    dividends = dict((dividend.date, dividend) for dividend in investment.dividend_set.all())
+def _populate_dividends(investment, fix_existing, historicalprices):
+    dividends = dict((dividend.investment.date, dividend)
+                         for dividend in models.Dividend.objects.select_related()
+                                                                .filter(historicalprice__investment=investment))
     dirty_dates = set()
     for row in pynvest_connect.dividends(investment.symbol, jurisdiction=investment.jurisdiction.symbol):
-        dividend = dividends.setdefault(row.date, models.Dividend(investment=investment, date=row.date))
+        dividend = dividends.setdefault(row.date, models.Dividend(historicalprice=historicalprices[row.date]))
         if dividend.amount == row.amount:
             if fix_existing:
                 continue
@@ -42,11 +43,13 @@ def _populate_dividends(investment, fix_existing):
         dirty_dates.add(row.date)
     return dirty_dates
 
-def _populate_splits(investment, fix_existing):
-    splits = dict((split.date, split) for split in investment.split_set.all())
+def _populate_splits(investment, fix_existing, historicalprices):
+    splits = dict((split.date, split)
+                      for split in models.Split.objects.select_related()
+                                                       .filter(historicalprice__investment=investment))
     dirty_dates = set()
     for row in pynvest_connect.splits(investment.symbol, jurisdiction=investment.jurisdiction.symbol):
-        split = splits.setdefault(row.date, models.Split(investment=investment, date=row.date))
+        split = splits.setdefault(row.date, models.Split(historicalprice=historicalprices[row.date]))
         if split.before == row.before and split.after == row.after:
             if fix_existing:
                 continue
@@ -74,9 +77,10 @@ def populate(*investments, **kwargs):
 
         dirty_dates = set()
         with django.db.transaction.commit_on_success():
+            historicalprices = dict((historicalprice.date, historicalprice) for historicalprice in investment.historicalprice_set.all())
             for func in [_populate_prices, _populate_dividends, _populate_splits]:
                 try:
-                    dirty_dates.update(func(investment, fix_existing))
+                    dirty_dates.update(func(investment, fix_existing, historicalprices))
                 except pynvest_connect.CallNotSupportedException:
                     pass
 
