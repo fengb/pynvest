@@ -29,7 +29,7 @@
           <td>{{ snapshot.close|floatformat:4 }}</td>
           <td>
             {% if snapshot.dividend %}
-              Div {{ snapshot.dividend|floatformat:4 }}
+              Div {{ snapshot.dividend.amount|floatformat:4 }}
             {% endif %}
             {% if snapshot.split %}
               Split {{ snapshot.split }}

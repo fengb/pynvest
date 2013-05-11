@@ -37,7 +37,7 @@ class Investment(models.Model):
 
     @property
     def snapshot_set(self):
-        return self.historicalprice_set.dividends().splits()
+        return self.historicalprice_set.select_related()
 
 
 class HistoricalPrice(models.Model):
@@ -50,31 +50,12 @@ class HistoricalPrice(models.Model):
     class Meta:
         unique_together = [('investment', 'date')]
 
-    def dividend_percent(self):
-        return self.dividend / self.close
-
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
         def filter_year_range(self, end_date=None):
             end_date = end_date or datetime.date.today()
             start_date = end_date - datetime.timedelta(days=365)
             return self.filter(date__lte=end_date, date__gte=start_date)
-
-        def dividends(self):
-            return self.extra(select={'dividend': '''
-                SELECT dividend.amount
-                  FROM %(dividend)s dividend
-                 WHERE dividend.date = %(self)s.date
-                   AND dividend.investment_id = %(self)s.investment_id
-            '''% {'self': self.model._meta.db_table, 'dividend': Dividend._meta.db_table}})
-
-        def splits(self):
-            return self.extra(select={'split': '''
-                SELECT split.before*1.0 / split.after
-                  FROM %(split)s split
-                 WHERE split.date = %(self)s.date
-                   AND split.investment_id = %(self)s.investment_id
-            '''% {'self': self.model._meta.db_table, 'split': Split._meta.db_table}})
 
 
 class Dividend(models.Model):
@@ -83,6 +64,10 @@ class Dividend(models.Model):
 
     def __unicode__(self):
         return '%s' % amount
+
+    def percent(self):
+        return self.amount / self.historicalprice.close
+
 
 class Split(models.Model):
     historicalprice = models.OneToOneField(HistoricalPrice)
