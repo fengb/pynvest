@@ -1,17 +1,8 @@
 from django.db import models
 import django.db.backends.signals
 import datetime
-import math
 
 from . import managers
-
-@django.dispatch.receiver(django.db.backends.signals.connection_created)
-def add_sqlite_math_functions(connection, **kwargs):
-    if connection.vendor != 'sqlite':
-        return
-
-    connection.connection.create_function('ln', 1, math.log)
-    connection.connection.create_function('exp', 1, math.exp)
 
 
 class Jurisdiction(models.Model):
@@ -84,17 +75,6 @@ class HistoricalPrice(models.Model):
                  WHERE split.date = %(self)s.date
                    AND split.investment_id = %(self)s.investment_id
             '''% {'self': self.model._meta.db_table, 'split': Split._meta.db_table}})
-
-        def close_adjusted(self):
-            # FIXME
-            aggr_func = 'SUM(LN(1.0 * close / (close + dividend) * COALESCE(split, 1)))'
-            subquery = '''SELECT %(table)s.close * EXP(COALESCE(%(aggr_func)s, 0))
-                            FROM %(table)s t
-                           WHERE investment_id = %(table)s.investment_id
-                             AND (dividend > 0 OR split_before != 1 OR split_after != 1)
-                             AND date > %(table)s.date
-                       ''' % {'table': self.model._meta.db_table, 'aggr_func': aggr_func}
-            return self.extra(select={'close_adjusted': subquery})
 
 
 class Dividend(models.Model):
