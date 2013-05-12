@@ -37,7 +37,7 @@ class Investment(models.Model):
 
     @property
     def snapshot_set(self):
-        return self.historicalprice_set.select_related()
+        return self.historicalprice_set.select_related('dividend', 'split')
 
 
 class HistoricalPrice(models.Model):
