@@ -67,9 +67,8 @@ class Lot(models.Model):
 
     objects = pynvest_investment.managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
-        @classmethod
-        def from_manager(cls, *args, **kwargs):
-            return cls(*args, **kwargs).annotate(outstanding_shares=models.Sum('transaction__shares'))
+        def from_manager(self):
+            return self.annotate(outstanding_shares=models.Sum('transaction__shares'))
 
 
 class Transaction(models.Model):
