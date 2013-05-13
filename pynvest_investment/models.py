@@ -1,6 +1,7 @@
 from django.db import models
 import django.db.backends.signals
 import datetime
+import decimal
 
 from . import managers
 
@@ -37,7 +38,7 @@ class Investment(models.Model):
 
     @property
     def snapshot_set(self):
-        return self.historicalprice_set.select_related('dividend', 'split')
+        return self.historicalprice_set.snapshot()
 
 
 class HistoricalPrice(models.Model):
@@ -50,8 +51,14 @@ class HistoricalPrice(models.Model):
     class Meta:
         unique_together = [('investment', 'date')]
 
+    def close_adjusted(self):
+        return self.close * self.priceadjustment.percent
+
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):
+        def snapshot(self):
+            return self.select_related('dividend', 'split', 'priceadjustment')
+
         def filter_year_range(self, end_date=None):
             end_date = end_date or datetime.date.today()
             start_date = end_date - datetime.timedelta(days=365)
@@ -76,3 +83,33 @@ class Split(models.Model):
 
     def __unicode__(self):
         return '%d:%d' % (self.after, self.before)
+
+
+class PriceAdjustment(models.Model):
+    historicalprice = models.OneToOneField(HistoricalPrice)
+    # Store as Float since it accomodates sigfigs better than Decimal
+    # Sigfigs are more important than digit accuracy for multiplication
+    raw             = models.FloatField()
+
+    def __unicode__(self):
+        return '%s %s' % (self.historicalprice, self.raw)
+
+    @property
+    def percent(self):
+        # Convert to Decimal since we use Decimal everywhere else
+        return decimal.Decimal(self.base / self.raw)
+
+    objects = managers.QuerySetManager()
+    class QuerySet(models.query.QuerySet):
+        def from_manager(self):
+            return self.extra(select={'base': '''
+                SELECT extra.raw
+                  FROM %(historicalprice)s hp
+                 INNER JOIN %(historicalprice)s hp_aggr
+                         ON hp_aggr.investment_id = hp.investment_id
+                 INNER JOIN %(self)s extra
+                         ON hp_aggr.id = extra.historicalprice_id
+                 WHERE hp.id = %(self)s.historicalprice_id
+                 ORDER BY hp_aggr.date DESC
+                 LIMIT 1
+            '''% {'self': self.model._meta.db_table, 'historicalprice': HistoricalPrice._meta.db_table}})

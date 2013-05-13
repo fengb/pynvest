@@ -12,11 +12,12 @@ class Populate(object):
         self.historicalprices = dict((historicalprice.date, historicalprice) for historicalprice in investment.historicalprice_set.all())
         self.dividends = self._historicalprice_subs(models.Dividend)
         self.splits = self._historicalprice_subs(models.Split)
+        self.priceadjustments = self._historicalprice_subs(models.PriceAdjustment)
 
     @classmethod
     def all(cls, *args, **kwargs):
         populate = cls(*args, **kwargs)
-        for func in [populate._prices, populate._dividends, populate._splits]:
+        for func in [populate._prices, populate._dividends, populate._splits, populate._priceadjustment]:
             try:
                 func()
             except pynvest_connect.CallNotSupportedException:
@@ -71,6 +72,26 @@ class Populate(object):
             split.after = row.after
             split.save()
             self.dirty_dates.add(row.date)
+
+    def _priceadjustment(self):
+        numerator = 1
+        denominator = 1
+
+        for date in sorted(self.historicalprices):
+            if date in self.dividends:
+                numerator *= (self.dividends[date].amount + self.historicalprices[date].close)
+                denominator *= self.historicalprices[date].close
+            if date in self.splits:
+                numerator *= self.splits[date].after
+                denominator *= self.splits[date].before
+
+            priceadjustment = self.priceadjustments.setdefault(date, models.PriceAdjustment(historicalprice=self.historicalprices[date]))
+            if priceadjustment.raw == float(numerator / denominator):
+                continue
+
+            priceadjustment.raw = float(numerator / denominator)
+            priceadjustment.save()
+            self.dirty_dates.add(date)
 
 
 class Command(django.core.management.base.BaseCommand):
