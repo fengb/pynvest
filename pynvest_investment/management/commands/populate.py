@@ -74,22 +74,24 @@ class Populate(object):
             self.dirty_dates.add(row.date)
 
     def _priceadjustment(self):
-        numerator = 1
-        denominator = 1
+        if self.fix_existing or not self.priceadjustments:
+            dates = sorted(self.historicalprices)
+            last_raw = 1.0
+        else:
+            dates = sorted(set(self.historicalprices) - set(self.priceadjustments))
+            last_raw = self.priceadjustments[max(self.priceadjustments)].raw
 
-        for date in sorted(self.historicalprices):
+        for date in dates:
             if date in self.dividends:
-                numerator *= (self.dividends[date].amount + self.historicalprices[date].close)
-                denominator *= self.historicalprices[date].close
+                last_raw *= float(self.dividends[date].amount + self.historicalprices[date].close) / float(self.historicalprices[date].close)
             if date in self.splits:
-                numerator *= self.splits[date].after
-                denominator *= self.splits[date].before
+                last_raw *= float(self.splits[date].after) / self.splits[date].before
 
             priceadjustment = self.priceadjustments.setdefault(date, models.PriceAdjustment(historicalprice=self.historicalprices[date]))
-            if priceadjustment.raw == float(numerator / denominator):
+            if priceadjustment.raw == last_raw:
                 continue
 
-            priceadjustment.raw = float(numerator / denominator)
+            priceadjustment.raw = last_raw
             priceadjustment.save()
             self.dirty_dates.add(date)
 
