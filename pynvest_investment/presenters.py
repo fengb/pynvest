@@ -22,9 +22,9 @@ def PriceFinder(investment, start_date=None):
         search_start_date = investment.snapshot_set.filter(date__lte=start_date).latest('date').date
         filter_args['date__gte'] = search_start_date
 
-    items = list(investment.snapshot_set.filter(**filter_args)
-                                        .order_by('date')
-                                        .values_list('date', 'close'))
+    items = [(snapshot.date, snapshot.adjusted('close'))
+                 for snapshot in investment.snapshot_set.filter(**filter_args)
+                                                        .order_by('date')]
 
     if start_date and items[0][0] != start_date:
         # hard cutoff at start_date

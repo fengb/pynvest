@@ -51,8 +51,11 @@ class HistoricalPrice(models.Model):
     class Meta:
         unique_together = [('investment', 'date')]
 
+    def adjusted(self, field):
+        return getattr(self, field) * decimal.Decimal(self.price_adjustment)
+
     def close_adjusted(self):
-        return self.close * decimal.Decimal(self.price_adjustment)
+        return self.adjusted('close')
 
     objects = managers.QuerySetManager()
     class QuerySet(models.query.QuerySet):

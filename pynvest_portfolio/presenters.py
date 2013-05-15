@@ -71,10 +71,10 @@ class LotSummary(object):
 def PortfolioInvestmentGrowth(portfolio, investment):
     transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
 
-    # https://code.djangoproject.com/ticket/13839
-    # Switch hasattr to related_default=None once it has been implemented
-    entries = [(t.date, t.shares, t.value())
-                   for t in transactions if not hasattr(t, 'adjustment')]
+    # Adjustment should not have cashflow value.
+    # Switch hasattr to related_default=None once https://code.djangoproject.com/ticket/13839 has been implemented
+    entries = [(t.date, t.shares, 0 if hasattr(t, 'adjustment') else t.value())
+                   for t in transactions]
 
     price_finder = pynvest_investment.presenters.PriceFinder(investment, min(entry[0] for entry in entries))
     return pynvest_investment.presenters.FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
