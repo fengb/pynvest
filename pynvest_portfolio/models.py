@@ -1,8 +1,8 @@
 from django.db import models
 import django
-import pynvest_investment
 import decimal
 import operator
+import pynvest_investment.models
 
 
 class Portfolio(models.Model):
