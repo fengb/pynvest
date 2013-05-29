@@ -29,37 +29,36 @@ class Populate(object):
 
     def _prices(self):
         for row in pynvest_connect.historical_prices(self.investment.symbol, jurisdiction=self.investment.jurisdiction.symbol):
-            historicalprice = self.historicalprices.setdefault(row.date, models.HistoricalPrice(investment=self.investment, date=row.date))
-            if (historicalprice.high  == row.high and
-                historicalprice.low   == row.low and
-                historicalprice.close == row.close):
+            if row.date in self.historicalprices:
                 break
-
-            historicalprice.high = row.high
-            historicalprice.low = row.low
-            historicalprice.close = row.close
-            historicalprice.save()
+            self.historicalprices[row.date] = models.HistoricalPrice.objects.create(
+                                                  investment=self.investment,
+                                                  date=row.date,
+                                                  high=row.high,
+                                                  low=row.low,
+                                                  close=row.close
+                                              )
             self.dirty_dates.add(row.date)
 
     def _dividends(self):
         for row in pynvest_connect.dividends(self.investment.symbol, jurisdiction=self.investment.jurisdiction.symbol):
-            dividend = self.dividends.setdefault(row.date, models.Dividend(historicalprice=self.historicalprices[row.date]))
-            if dividend.amount == row.amount:
+            if row.date in self.dividends:
                 break
-
-            dividend.amount = row.amount
-            dividend.save()
+            self.dividends[row.date] = models.Dividend.objects.create(
+                                           historicalprice=self.historicalprices[row.date],
+                                           amount=row.amount
+                                       )
             self.dirty_dates.add(row.date)
 
     def _splits(self):
         for row in pynvest_connect.splits(self.investment.symbol, jurisdiction=self.investment.jurisdiction.symbol):
-            split = self.splits.setdefault(row.date, models.Split(historicalprice=self.historicalprices[row.date]))
-            if split.before == row.before and split.after == row.after:
+            if row.date in self.splits:
                 break
-
-            split.before = row.before
-            split.after = row.after
-            split.save()
+            self.splits[row.date] = models.Split.objects.create(
+                                        historicalprice=self.historicalprices[row.date],
+                                        before=row.before,
+                                        after=row.after
+                                    )
             self.dirty_dates.add(row.date)
 
     def _priceadjustments(self):
@@ -76,12 +75,10 @@ class Populate(object):
             if date in self.splits:
                 last_raw *= float(self.splits[date].after) / self.splits[date].before
 
-            priceadjustment = self.priceadjustments.setdefault(date, models.PriceAdjustment(historicalprice=self.historicalprices[date]))
-            if priceadjustment.raw == last_raw:
-                continue
-
-            priceadjustment.raw = last_raw
-            priceadjustment.save()
+            self.priceadjustments[date] = models.PriceAdjustment.objects.create(
+                                              historicalprice=self.historicalprices[date],
+                                              raw=last_raw
+                                          )
             self.dirty_dates.add(date)
 
 
