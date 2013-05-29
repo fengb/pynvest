@@ -4,9 +4,8 @@ from pynvest_investment import models
 
 
 class Populate(object):
-    def __init__(self, investment, fix_existing):
+    def __init__(self, investment):
         self.investment = investment
-        self.fix_existing = fix_existing
 
         self.dirty_dates = set()
         self.historicalprices = dict((historicalprice.date, historicalprice) for historicalprice in investment.historicalprice_set.all())
@@ -35,10 +34,7 @@ class Populate(object):
             if (historicalprice.high  == row.high and
                 historicalprice.low   == row.low and
                 historicalprice.close == row.close):
-                if self.fix_existing:
-                    continue
-                else:
-                    break
+                break
 
             historicalprice.high = row.high
             historicalprice.low = row.low
@@ -50,10 +46,7 @@ class Populate(object):
         for row in pynvest_connect.dividends(self.investment.symbol, jurisdiction=self.investment.jurisdiction.symbol):
             dividend = self.dividends.setdefault(row.date, models.Dividend(historicalprice=self.historicalprices[row.date]))
             if dividend.amount == row.amount:
-                if self.fix_existing:
-                    continue
-                else:
-                    break
+                break
 
             dividend.amount = row.amount
             dividend.save()
@@ -63,10 +56,7 @@ class Populate(object):
         for row in pynvest_connect.splits(self.investment.symbol, jurisdiction=self.investment.jurisdiction.symbol):
             split = self.splits.setdefault(row.date, models.Split(historicalprice=self.historicalprices[row.date]))
             if split.before == row.before and split.after == row.after:
-                if self.fix_existing:
-                    continue
-                else:
-                    break
+                break
 
             split.before = row.before
             split.after = row.after
@@ -74,12 +64,12 @@ class Populate(object):
             self.dirty_dates.add(row.date)
 
     def _priceadjustment(self):
-        if self.fix_existing or not self.priceadjustments:
-            dates = sorted(self.historicalprices)
-            last_raw = 1.0
-        else:
+        if self.priceadjustments:
             dates = sorted(set(self.historicalprices) - set(self.priceadjustments))
             last_raw = self.priceadjustments[max(self.priceadjustments)].raw
+        else:
+            dates = sorted(self.historicalprices)
+            last_raw = 1.0
 
         for date in dates:
             if date in self.dividends:
@@ -100,7 +90,6 @@ class Command(django.core.management.base.BaseCommand):
     help = 'Populates all prices for existing investments'
 
     def handle(self, *args, **options):
-        fix_existing = options.pop('fix_existing', False)
         investments = models.Investment.objects.all()
 
         num_investments = len(investments)
@@ -111,7 +100,7 @@ class Command(django.core.management.base.BaseCommand):
             self.stdout.write('%3d/%d %-11s ' % (index + 1, num_investments, investment.symbol), ending='')
 
             with django.db.transaction.commit_on_success():
-                populate = Populate.all(investment, fix_existing)
+                populate = Populate.all(investment)
 
             if populate.dirty_dates:
                 if len(populate.dirty_dates) > 1:
