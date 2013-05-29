@@ -16,16 +16,15 @@ class Populate(object):
     @classmethod
     def all(cls, *args, **kwargs):
         populate = cls(*args, **kwargs)
-        for func in [populate._prices, populate._dividends, populate._splits, populate._priceadjustment]:
-            try:
-                func()
-            except pynvest_connect.CallNotSupportedException:
-                pass
+        populate._prices()
+        populate._dividends()
+        populate._splits()
+        populate._priceadjustments()
         return populate
 
-    def _historicalprice_subs(self, Model):
+    def _historicalprice_subs(self, model):
         return dict((instance.historicalprice.date, instance)
-                        for instance in Model.objects.select_related()
+                        for instance in model.objects.select_related()
                                                      .filter(historicalprice__investment=self.investment))
 
     def _prices(self):
@@ -63,7 +62,7 @@ class Populate(object):
             split.save()
             self.dirty_dates.add(row.date)
 
-    def _priceadjustment(self):
+    def _priceadjustments(self):
         if self.priceadjustments:
             dates = sorted(set(self.historicalprices) - set(self.priceadjustments))
             last_raw = self.priceadjustments[max(self.priceadjustments)].raw
