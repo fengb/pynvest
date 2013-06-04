@@ -19,4 +19,5 @@ urlpatterns = patterns('',
     url(r'^investment/', include('pynvest_investment.urls')),
     url(r'^portfolio/', include('pynvest_portfolio.urls')),
     url(r'^p1/', include(pynvest_portfolio.urls.portfolio(1))),
+    url(r'^portfolio/', include('pynvest_ownership.urls')),
 )
