@@ -64,24 +64,7 @@ def BenchmarkGrowth(growth, investment):
     start_date = next(iter(growth))
     price_finder = PriceFinder(investment, start_date)
 
-    dividends = (models.Dividend.objects.filter(historicalprice__investment=investment, historicalprice__date__gt=start_date)
-                                        .order_by('historicalprice__date'))
-    dividends = collections.deque(dividends)
-    cashflows = collections.deque(growth.cashflows())
-    sum_shares = 0
-    entries = []
-    while cashflows or dividends:
-        if cashflows and (not dividends or cashflows[0][0] <= dividends[0].historicalprice.date):
-            (date, value) = cashflows.popleft()
-            shares = value / price_finder[date]
-        else: # if dividends and (not cashflows or dividends[0].date < cashflows[0][0]):
-            dividend = dividends.popleft()
-            date = dividend.historicalprice.date
-            shares = sum_shares * dividend.amount / price_finder[dividend.historicalprice.date]
-            value = 0 # reinvested dividends are not from outside thus are not cash values
-
-        sum_shares += shares
-        entries.append((date, shares, value))
+    entries = [(date, value / price_finder[date], value) for (date, value) in growth.cashflows()]
 
     return FlatGrowth(entries, price_finder, name=investment.symbol)
 
