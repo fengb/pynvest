@@ -66,21 +66,3 @@ class LotSummary(object):
         keyfunc = lambda x: x.investment.symbol
         lots.sort(key=keyfunc)
         return [cls(ls) for (investment, ls) in itertools.groupby(lots, key=keyfunc)]
-
-
-def PortfolioInvestmentGrowth(portfolio, investment):
-    transactions = models.Transaction.objects.filter(lot__portfolio=portfolio, lot__investment=investment)
-
-    # Adjustment should not have cashflow value.
-    # Switch hasattr to related_default=None once https://code.djangoproject.com/ticket/13839 has been implemented
-    entries = [(t.date, t.shares, 0 if hasattr(t, 'adjustment') else t.value())
-                   for t in transactions]
-
-    price_finder = pynvest_investment.presenters.PriceFinder(investment, min(entry[0] for entry in entries))
-    return pynvest_investment.presenters.FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
-
-
-def PortfolioGrowth(portfolio):
-    investments = set(lot.investment for lot in portfolio.lot_set.all())
-    return pynvest_investment.presenters.AggregateGrowth((PortfolioInvestmentGrowth(portfolio, investment) for investment in investments),
-                                                         name=portfolio.name)

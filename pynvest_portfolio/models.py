@@ -2,7 +2,7 @@ from django.db import models
 import django
 import decimal
 import operator
-import pynvest_investment.models
+import pynvest_investment.models, pynvest_investment.presenters
 
 
 class Portfolio(models.Model):
@@ -32,6 +32,22 @@ class Portfolio(models.Model):
                 if shares <= 0:
                     break
             return transactions
+
+    def investment_growth(self, investment):
+        transactions = Transaction.objects.filter(lot__portfolio=self, lot__investment=investment)
+
+        # Adjustment should not have cashflow value.
+        # Switch hasattr to related_default=None once https://code.djangoproject.com/ticket/13839 has been implemented
+        entries = [(t.date, t.shares, 0 if hasattr(t, 'adjustment') else t.value())
+                       for t in transactions]
+
+        price_finder = pynvest_investment.presenters.PriceFinder(investment, min(entry[0] for entry in entries))
+        return pynvest_investment.presenters.FlatGrowth(entries, price_finder=price_finder, name=investment.symbol)
+
+    def growth(self):
+        investments = set(lot.investment for lot in self.lot_set.all())
+        return pynvest_investment.presenters.AggregateGrowth((self.investment_growth(investment) for investment in investments),
+                                                             name=self.name)
 
 
 class Lot(models.Model):

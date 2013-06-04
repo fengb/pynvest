@@ -9,7 +9,7 @@ class Command(django.core.management.base.BaseCommand):
     def handle(self, *args, **options):
         portfolios = pynvest_portfolio.models.Portfolio.objects.all()
         for portfolio in portfolios:
-            growth = pynvest_portfolio.presenters.PortfolioGrowth(portfolio)
+            growth = portfolio.growth()
             contributions = models.Contribution.objects.filter(transaction__lot__portfolio=portfolio)\
                                                        .order_by('transaction__date')
 

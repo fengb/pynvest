@@ -24,7 +24,7 @@ def summary(request, id):
 def growth(request, id, compare=None):
     portfolio = get_object_or_404(models.Portfolio, id=id)
 
-    growths = [presenters.PortfolioGrowth(portfolio)]
+    growths = [portfolio.growth()]
     if compare:
         for symbol in compare.split('+'):
             investment = get_object_or_404(pynvest_investment.models.Investment, symbol=symbol)
