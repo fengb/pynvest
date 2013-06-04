@@ -15,21 +15,28 @@ import collections
 import decimal
 
 
-def PriceFinder(investment, start_date=None):
+def _finder(investment, field, start_date=None):
     filter_args = {}
     if start_date:
         # start_date may not have a price entry.  We need to backtrack to find the real start date.
         search_start_date = investment.snapshot_set.filter(date__lte=start_date).latest('date').date
         filter_args['date__gte'] = search_start_date
 
-    items = [(snapshot.date, snapshot.adjusted('close'))
-                 for snapshot in investment.snapshot_set.filter(**filter_args)
-                                                        .order_by('date')]
+    items = [[snapshot.date, field(snapshot)]
+                for snapshot in investment.snapshot_set.filter(**filter_args)
+                                                       .order_by('date')]
 
-    if start_date and items[0][0] != start_date:
+    if start_date:
         # hard cutoff at start_date
-        items[0] = (start_date, items[0][1])
+        items[0][0] = start_date
+
     return utils.BestMatchDict(items, default=decimal.Decimal(0))
+
+def PriceFinder(investment, start_date=None):
+    return _finder(investment, operator.attrgetter('close'), start_date)
+
+def AdjustedPriceFinder(investment, start_date=None):
+    return _finder(investment, operator.methodcaller('adjusted', 'close'), start_date)
 
 
 class FlatGrowth(object):
@@ -62,7 +69,7 @@ class FlatGrowth(object):
 
 def BenchmarkGrowth(growth, investment):
     start_date = next(iter(growth))
-    price_finder = PriceFinder(investment, start_date)
+    price_finder = AdjustedPriceFinder(investment, start_date)
 
     entries = [(date, value / price_finder[date], value) for (date, value) in growth.cashflows()]
 
